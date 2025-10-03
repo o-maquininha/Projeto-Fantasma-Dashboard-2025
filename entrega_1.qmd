@@ -14,7 +14,6 @@ source("rdocs/entrega_1.R")
 ### CRAN version
 install.packages('tinytex')
 
-
 ## Baixando o tinytex
 library(tinytex)
 tinytex::install_tinytex()
@@ -25,6 +24,8 @@ tinytex::install_tinytex()
 Esse template foi criado para o alocado conseguir observar como ficaria sua análise o arquivo principal. É daqui que o gerente de projetos irá copiar a análise e inserir no documento principal que gerará o relatório estatístico.
 
 # Análises
+
+dale
 
 ## Análise 1
 
