@@ -6,76 +6,285 @@ output-file: "Entrega 1"
 ```{r setup}
 #| include: false
 source("rdocs/entrega_1.R")
+knitr::opts_chunk$set(echo = TRUE, cache=T, message=F, warning=F, error=F)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load("tidyverse", "readxl", "knitr", "kableExtra")
+options(scipen=0)
 ```
 
-```{r}
-# Rodar apenas uma vez na vida!
-## Instalando o tinytex(pacote apenas)
-### CRAN version
-install.packages('tinytex')
+```{r echo=FALSE}
+source("rdocs/source/packages.R")
 
-## Baixando o tinytex
-library(tinytex)
-tinytex::install_tinytex()
+relatorio_vendas <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "relatorio_vendas")
+info_vendas <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_vendas")
+info_produtos <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_produtos")
+info_funcionarios <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_funcionarios")
+info_cidades <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_cidades")
+info_clientes <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_clientes")
+info_lojas <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_lojas")
+
+relatorio_vendas$Date <- ymd(relatorio_vendas$Date)
+
+relatorio_vendas <- relatorio_vendas %>% 
+  inner_join(info_vendas, by = c("SaleID" = "Sal3ID")) %>% 
+  inner_join(info_lojas, by = c("StoreID" = "Stor3ID")) %>% 
+  inner_join(info_cidades, by = c("CityID" = "C1tyID")) %>% 
+  inner_join(info_produtos, by = c("ItemID" = "Ite3ID")) %>% 
+  inner_join(info_clientes, by = c("ClientID" = "Cli3ntID"))
+
+relatorio_vendas <- relatorio_vendas %>% 
+  mutate(ano = year(Date)) %>%
+  mutate(UnityPrice = UnityPrice * 5.31) %>% 
+  mutate(receitaVenda = Quantity * UnityPrice)
 ```
 
 # Objetivo
 
 Esse template foi criado para o alocado conseguir observar como ficaria sua análise o arquivo principal. É daqui que o gerente de projetos irá copiar a análise e inserir no documento principal que gerará o relatório estatístico.
 
+# Introdução
+
+# Método
+
+\ \ \ \ Neste estudo, serão utilizados dados fictícios fornecidos pela ESTAT - Consultoria Estatística, com o objetivo de avaliar o nível de conhecimento do Trainee. Foram aplicados os seguintes métodos descritivos e inferenciais [...] para a análise das variáveis em estudo (conferir Anexo 1).
+
 # Análises
 
-dale
+\ \ \ \ O conjunto de dados consiste em 19.885 observações de vendas de 10 tipos de **produtos** em 18 **lojas** distintas nas 5 **cidades** da região de interesse.
 
 ## Análise 1
 
-## Análise 2
+```{r}
+#| echo: false
+
+tabela1 <-  relatorio_vendas %>% 
+  group_by(ano, NameStore, NameProduct, NameCity) %>%
+  summarise(
+    receitaAnual = sum(receitaVenda)
+  ) #%>% View
+
+tabela2 <- tabela1 %>% 
+  group_by(NameStore) %>% 
+  summarise(
+    Média = mean(receitaAnual),
+    Mediana = median(receitaAnual),
+    DP = sd(receitaAnual),
+  ) %>% 
+  arrange(desc(Média)) #%>% View
+
+tabela3 <- relatorio_vendas %>%
+  group_by(ano) %>% 
+  summarise(
+    receitaAnual = sum(receitaVenda)
+  ) #%>% View
+
+tabela4 <- relatorio_vendas %>% 
+  group_by(NameProduct) %>%
+  summarise(
+    Quantidade = sum(Quantity)
+    ) %>% 
+  arrange(desc(Quantidade)) #%>% View
+
+tabela5 <- tabela1 %>% 
+  group_by(NameProduct) %>%
+  summarise(
+    Média = mean(receitaAnual),
+    Mediana = median(receitaAnual),
+    DP = sd(receitaAnual),
+  ) %>% 
+  arrange(desc(Média)) #%>% View
+
+tabela6 <- relatorio_vendas %>% 
+  group_by(NameCity) %>%
+  summarise(
+    Quantidade = sum(Quantity)
+    ) %>% 
+  arrange(desc(Quantidade)) #%>% View
+
+tabela7 <- tabela1 %>% 
+  group_by(NameCity) %>%
+  summarise(
+    Média = mean(receitaAnual),
+    Mediana = median(receitaAnual),
+    DP = sd(receitaAnual),
+  ) %>% 
+  arrange(desc(Média)) #%>% View
+
+```
 
 ```{r}
-#| label: fig-
-#| fig-cap: "Gráfico "
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-1
+#| tbl-cap: "Receita anual da região nos anos de 1880 a 1889"
+#| cap-location: top
 
+colnames(tabela3) <- c("Ano", "Receita")
+tabela3 %>% kable(digits = c(0, 2))
+```
 
+```{r}
+#| echo: false
+#| label: fig-grafico-1
+#| fig-cap: Receita anual da região
+
+relatorio_vendas %>% 
+  group_by(ano) %>% 
+  summarise(receita = sum(receitaVenda)) %>%
+  ggplot(aes(ano, receita)) +
+  scale_x_continuous(breaks = c(1880:1889)) +
+  geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
+  geom_point(size = 1.5, colour = "#9D1C18") +
+  geom_line(colour = "#9D1C18") +
+  labs(x = "Ano", y = "Receita Total") +
+  theme_estat()
 
 ```
 
+\newpage
 
-::: {#quad- layout-align="center" quad-pos="H"}
+\ \ \ \ A receita anual da região apresentou um crescimento expressivo ao longo do período analisado, com um aumento total de R\$ 168.169,70 desde o início da série histórica. Esses resultados indicam que a região apresenta **grande potencial** de investimento.
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-2
+#| tbl-cap: "Resumo da receita das lojas nos anos de 1880 a 1889"
+#| cap-location: top
+
+colnames(tabela2)[1] <- "Loja"
+tabela2 %>% kable(digits = 2)
+```
+
+```{r}
+#| echo: false
+#| label: fig-grafico-2
+#| fig-cap: Receita anual das lojas
+#| fig-width: 12
+#| fig-height: 8
+
+relatorio_vendas %>%
+  group_by(ano, NameStore) %>% 
+  summarise(receita = sum(receitaVenda)) %>% 
+  ggplot(aes(ano, receita)) +
+  scale_x_continuous(breaks = seq(1880, 1889, by = 2)) +
+  geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
+  geom_point(size = 1.5, colour = "#A11D21") +
+  geom_line(colour = "#A11D21") +
+  facet_wrap(~NameStore, nrow = 3) +
+  labs(x = "Ano", y = "Receita") +
+  theme_estat()
+```
+
+\ \ \ \ As 18 lojas da região apresentam comportamentos diversos, sendo que a maioria registrou crescimento na receita anual ao longo do período analisado. A loja **Saloon** destaca-se das demais, em que sua receita anual apresentou uma queda significativa durante o mesmo intervalo.
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-3
+#| tbl-cap: "Quantidade de produtos vendidos nos anos de 1880 a 1889"
+#| cap-location: top
+
+colnames(tabela4) <- c("Produto", "Quantidade")
+tabela4 %>% kable()
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-4
+#| tbl-cap: "Resumo da receita dos produtos nos anos de 1880 a 1889"
+#| cap-location: top
+
+colnames(tabela5)[1] <- "Produto"
+tabela5 %>% kable(digits = 2)
+```
+
+```{r}
+#| echo: false
+#| label: fig-grafico-3
+#| fig-cap: Receita anual por produto
+#| fig-width: 12
+#| fig-height: 8
+
+relatorio_vendas %>%
+  group_by(ano, NameProduct) %>% 
+  summarise(receita = sum(receitaVenda)) %>%
+  ggplot(aes(ano,receita)) +
+  scale_x_continuous(breaks = seq(1880, 1889, by = 2)) +
+  geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
+  geom_point(size = 1.5, colour = "#9D1C18") +
+  geom_line(colour = "#9D1C18") +
+  facet_wrap(~NameProduct, nrow = 2) +
+  labs(x = "Ano", y = "Receita") +
+  theme_estat()
+
+```
+
+\ \ \ \ Dos 10 produtos disponíveis, o **Cavalo** apresentou a maior média de receita, mesmo sendo o menos vendido. Esse resultado se deve ao elevado preço unitário do produto, de R\$ 2.981,99.  O **Chapéu de Couro** foi o item mais vendido na região, seguido pela **Espingarda** e pela **Colt .45**. É importante observar que a soma das quantidades vendidas das duas armas foi de 10.295 unidades, enquanto o total de **Munições** vendidas foi de apenas 4.862. Esse contraste pode indicar que os consumidores adquirem munições em outras regiões ou não sentem necessidade de comprá-las com frequência após a aquisição da arma. Além disso, nota-se que foram vendidas mais do que o dobro de **Selas** em relação ao número de **Cavalos**, o que pode sugerir que as **Selas** vendidas na região são de baixa qualidade ou mal cuidadas.
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-5
+#| tbl-cap: "Quantidade de produtos vendidos por cidade nos anos de 1880 a 1889"
+#| cap-location: top
+
+colnames(tabela6) <- c("Cidade", "Quantidade")
+tabela6 %>% kable()
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-6
+#| tbl-cap: "Resumo da receita das cidades nos anos de 1880 a 1889"
+#| cap-location: top
+
+colnames(tabela7)[1] <- "Cidade"
+tabela7 %>% kable(digits = 2)
+```
+
+```{r}
+#| echo: false
+#| label: fig-grafico-4
+#| fig-cap: Receita anual por cidade
+
+relatorio_vendas %>%
+  group_by(ano, NameCity) %>% 
+  summarise(receita = sum(receitaVenda)) %>%
+  ungroup() %>% 
+  select(ano, NameCity, receita) %>%
+  ggplot(aes(ano,receita, colour = NameCity)) +
+  scale_x_continuous(breaks = seq(1880, 1889, by = 2)) +
+  #geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
+  geom_point(size = 3, alpha = .5) +
+  geom_line(size = 1) +
+  #facet_wrap(~NameCity, nrow = 2) +
+  labs(x = "Ano", y = "Receita", colour = "Cidade") +
+  theme_estat() +
+  theme(legend.position = "right")
+
+```
+
+\ \ \ \ A cidade de **Rio Bravo** apresentou o maior crescimento em receita anual ao longo do período analisado, destacando-se também por possuir o maior número de vendas (11290) e a maior receita média (R\$2.527,90). Observa-se que **Canoa Quebrada** realizou apenas 8.031 vendas nos 10 anos em análise, mas registrou a segunda maior receita média. As cidades de **Rio Bravo**, **Canoa Quebrada** e **Âmbar Seco** demonstram bom crescimento econômico e se mostram promissoras para investimentos futuros.
+
+
+## Análise 2
+
 ```{=latex}
-
-
-
 ```
-
-Medidas resumo da 
-:::
-
-
-
-::: {#tbl-modalidades layout-align="center" tbl-pos="H"}
-```{=latex}
-
-
-```
-
-
-:::
-
-
-
 
 $\ref{fig-}$
 
 [@tbl-]
 
-
 [**Quadro** @quad-]
 
+## Análise 3
 
+# Conclusão
 
+# Anexo
 
-
-
-
-
-
+1. [Resumo das variáveis](anexo/CONTEXTUALIZAÇÃO.pdf)
