@@ -50,7 +50,7 @@ Esse template foi criado para o alocado conseguir observar como ficaria sua aná
 
 # Análises
 
-\ \ \ \ O conjunto de dados consiste em 19.885 observações de vendas de 10 tipos de **produtos** em 18 **lojas** distintas nas 5 **cidades** da região de interesse.
+\ \ \ \ O conjunto de dados consiste em 19.885 observações de compras feitas por 1990 **clientes** de 10 tipos de **produtos** em 18 **lojas** distintas nas 5 **cidades** da região de interesse.
 
 ## Análise 1
 
@@ -110,6 +110,13 @@ tabela7 <- tabela1 %>%
   ) %>% 
   arrange(desc(Média)) #%>% View
 
+tabela8 <- tabela1 %>% 
+  filter(ano %in% c(1880, 1889)) %>%
+  group_by(NameCity) %>%
+  summarise(
+    "Taxa de cerscimento (%)" = ((sum(receitaAnual[ano == 1889]) -sum(receitaAnual[ano == 1880]))/sum(receitaAnual[ano == 1880])) * 100
+  ) %>% arrange(desc(`Taxa de cerscimento (%)`)) #%>% View
+
 ```
 
 ```{r}
@@ -119,7 +126,7 @@ tabela7 <- tabela1 %>%
 #| tbl-cap: "Receita anual da região nos anos de 1880 a 1889"
 #| cap-location: top
 
-colnames(tabela3) <- c("Ano", "Receita")
+colnames(tabela3) <- c("Ano", "Receita (R$)")
 tabela3 %>% kable(digits = c(0, 2))
 ```
 
@@ -143,7 +150,7 @@ relatorio_vendas %>%
 
 \newpage
 
-\ \ \ \ A receita anual da região apresentou um crescimento expressivo ao longo do período analisado, com um aumento total de R\$ 168.169,70 desde o início da série histórica. Esses resultados indicam que a região apresenta **grande potencial** de investimento.
+\ \ \ \ A receita anual da região apresentou um crescimento expressivo ao longo do período analisado, com um aumento total de R\$168.169,70 desde o início da série histórica. Esses resultados indicam que a região apresenta **grande potencial** de investimento.
 
 ```{r}
 #| echo: false
@@ -176,7 +183,7 @@ relatorio_vendas %>%
   theme_estat()
 ```
 
-\ \ \ \ As 18 lojas da região apresentam comportamentos diversos, sendo que a maioria registrou crescimento na receita anual ao longo do período analisado. A loja **Saloon** destaca-se das demais, em que sua receita anual apresentou uma queda significativa durante o mesmo intervalo.
+\ \ \ \ As 18 lojas da região apresentam comportamentos diversos, sendo que a maioria registrou crescimento na receita anual ao final do período em relação ao primeiro ano da série. A loja **Saloon** destaca-se das demais, em que sua receita anual apresentou uma queda significativa durante o mesmo intervalo.
 
 ```{r}
 #| echo: false
@@ -247,6 +254,28 @@ tabela7 %>% kable(digits = 2)
 
 ```{r}
 #| echo: false
+#| results: asis
+#| label: tbl-tabela-7
+#| tbl-cap: "Quantidade de produtos vendidos por cidade nos anos de 1880 a 1889"
+#| cap-location: top
+
+colnames(tabela6) <- c("Cidade", "Quantidade")
+tabela6 %>% kable()
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-8
+#| tbl-cap: "Taxa de crescimento econômico (%) das cidades entre 1880 e 1889"
+#| cap-location: top
+
+colnames(tabela8)[1] <- "Ano"
+tabela8 %>% kable(digits = 2)
+```
+
+```{r}
+#| echo: false
 #| label: fig-grafico-4
 #| fig-cap: Receita anual por cidade
 
@@ -267,7 +296,7 @@ relatorio_vendas %>%
 
 ```
 
-\ \ \ \ A cidade de **Rio Bravo** apresentou o maior crescimento em receita anual ao longo do período analisado, destacando-se também por possuir o maior número de vendas (11290) e a maior receita média (R\$2.527,90). Observa-se que **Canoa Quebrada** realizou apenas 8.031 vendas nos 10 anos em análise, mas registrou a segunda maior receita média. As cidades de **Rio Bravo**, **Canoa Quebrada** e **Âmbar Seco** demonstram bom crescimento econômico e se mostram promissoras para investimentos futuros.
+\ \ \ \ A cidade de **Rio Bravo** apresentou o maior crescimento em receita anual ao longo do período analisado, destacando-se também por possuir o maior número de vendas (11290) e a maior receita média (R\$2.527,90). Observa-se que **Canoa Quebrada** realizou apenas 8.031 vendas nos 10 anos em análise, mas registrou a segunda maior receita média. Toodas As cidades demonstram bom crescimento econômico e se mostram **promissoras** para investimentos futuros, porém as cidades com maior taxa de crescimento econômico foi **Rio Bravo**, **Canoa Quebrada** e **Sussuro de Pedra**.
 
 
 ## Análise 2
@@ -287,4 +316,29 @@ $\ref{fig-}$
 
 # Anexo
 
-1. [Resumo das variáveis](anexo/CONTEXTUALIZAÇÃO.pdf)
+1. Dicionário das variáveis do banco de dados
+
+- ClienteID: Chave do cliente 
+- Name: O nome do cliente 
+- Age: A idade do cliente em anos 
+- Sex: Sexo do Cliente 
+- Height_dm: A altura do cliente em decímetros 
+- Weight_lbs: O peso do cliente, em libras 
+- Anual_Income_usd: Renda do cliente anualmente em dólares 
+- CityID: Chave da cidade 
+- NameCity: Nome da cidade 
+- EmployeeID: Chave do funcionário 
+- EmployeeName: Nome do funcionário 
+- StoreID: Chave da loja 
+- StoreName: Nome da loja 
+- CityID: Chave da cidade 
+- ItemID: Chave do produto 
+- NameProduct: Nome do produto 
+- UnityPrice: Preço unitário do produto em dólores 
+- SaleID: Chave da venda 
+- ItemID: Chave do produto 
+- SaleID: Chave da venda 
+- Date: A data da ocorrência da venda (YYYY-MM-DD) 
+- StoreID: Chave da loja 
+- ClientID: Chave do cliente 
+- Quantity: Quantidade comprada deste produto

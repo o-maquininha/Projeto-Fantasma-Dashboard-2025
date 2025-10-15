@@ -4,7 +4,7 @@
 % \ProvidesExplClass {estat} {2024/03/09} {0.1} {Standard estat class}
 
 % \DeclareOption*{\PassOptionsToClass{\CurrentOption{article}}}
-\DeclareOption*{\CalssWarning{estat}{\CurrentOption not declared!}}
+\DeclareOption*{\ClassWarning{estat}{\CurrentOption not declared!}}
 \ProcessOptions\relax
 
 % Select article as main class

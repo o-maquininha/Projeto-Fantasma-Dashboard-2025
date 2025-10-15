@@ -1,0 +1,35 @@
+This is XeTeX, Version 3.141592653-2.6-0.999997 (TeX Live 2025) (preloaded format=xelatex 2025.9.27)  3 OCT 2025 18:00
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**Referencial-Teórico.tex
+(./Referencial-Teórico.tex
+LaTeX2e <2025-06-01> patch level 1
+L3 programming layer <2025-09-02>
+(./estat/estat.cls
+
+LaTeX Warning: You have requested document class `estat/estat',
+               but the document class provides `estat'.
+
+Document Class: estat 2024-02-24 Standard estat class
+! Undefined control sequence.
+\default@ds ->\CalssWarning 
+                            {estat}{\CurrentOption not declared!}
+l.8 \ProcessOptions\relax
+                         
+The control sequence at the end of the top line
+of your error message was never \def'ed. If you have
+misspelled it (e.g., `\hobx'), type `I' and the correct
+spelling (e.g., `I\hbox'). Otherwise just continue,
+and I'll forget about whatever was undefined.
+
+ 
+Here is how much of TeX's memory you used:
+ 45 strings out of 470405
+ 875 string characters out of 5484599
+ 426348 words of memory out of 5000000
+ 28513 multiletter control sequences out of 15000+600000
+ 627721 words of font info for 40 fonts, out of 8000000 for 9000
+ 14 hyphenation exceptions out of 8191
+ 27i,0n,37p,118b,17s stack positions out of 10000i,1000n,20000p,200000b,200000s
+No pages of output.
