@@ -51,7 +51,7 @@ Esse template foi criado para o alocado conseguir observar como ficaria sua aná
 
 # Método
 
-\ \ \ \ Neste estudo, serão utilizados dados fictícios fornecidos pela ESTAT - Consultoria Estatística, com o objetivo de avaliar o nível de conhecimento do Trainee. Foram aplicados os seguintes métodos descritivos e inferenciais: [...] para a análise das variáveis em estudo (conferir Anexo 1).
+\ \ \ \ Neste estudo, serão utilizados dados fictícios fornecidos pela ESTAT - Consultoria Estatística, com o objetivo de avaliar o nível de conhecimento do Trainee. Foram aplicados os seguintes métodos descritivos e inferenciais: \[...\] para a análise das variáveis em estudo (conferir Anexo 1).
 
 # Análises
 
@@ -127,6 +127,7 @@ tabela8 <- tabela1 %>%
 \ \ \ \ O objetivo desta análise é compreender o comportamento das **lojas** ao longo da série temporal por meio da **receita anual** e da **receita média**. A receita anual corresponde à soma da quantidade vendida multiplicada pelo preço unitário de cada item comercializado em determinado ano, enquanto a receita média é a soma da receita anual dividido pela quantidade de lojas na região. Foram utilizados gráficos de dispersão para facilitar a visualização e a análise dos dados. Na Figura 1, o gráfico é apresentado em facetas e mostra a receita anual de cada loja, com o ano no eixo x e a receita total anual no eixo y. Já na Figura 2, o gráfico apresenta a receita média. A Tabela 1 apresenta a média, a mediana e o desvio-padrão da receita de cada loja em todo o período, enquanto a Tabela 2 mostra a receita média em reais ao longo dos anos de 1880 a 1889.
 
 \vspace{.2cm}
+
 ```{r}
 #| echo: false
 #| label: fig-grafico-1
@@ -160,7 +161,6 @@ colnames(tabela2)[1] <- "Loja"
 tabela2 %>% kable(digits = 2)
 ```
 
-
 \ \ \ \ As 18 lojas da região apresentam comportamentos diversos, sendo que a maioria registrou crescimento na receita anual ao final do período em relação ao primeiro ano da série. A loja **Saloon** destaca-se das demais, em que sua receita anual apresentou uma queda significativa durante o mesmo intervalo. As lojas que tiveram maior receita média nos 10 anos em estudo foram **Ferraria Apache**, **Loja Ouro Fino** e **Loja TendTudo**, já as que tiveram a menor receita méida foram **Banco Careca**, **Loja Riacho Prateado** e **Saloon Rastro de Poeira**.
 
 \newpage
@@ -176,8 +176,8 @@ relatorio_vendas %>%
   ggplot(aes(ano, receita)) +
   scale_x_continuous(breaks = c(1880:1889)) +
   # geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
-  geom_point(size = 1.5, colour = "#9D1C18") +
-  geom_line(colour = "#9D1C18") +
+  geom_point(size = 1.5, colour = "#A11D21") +
+  geom_line(colour = "#A11D21") +
   labs(x = "Ano", y = "Receita Média") +
   theme_estat()
 
@@ -217,8 +217,8 @@ relatorio_vendas %>%
   ggplot(aes(ano,receita)) +
   scale_x_continuous(breaks = seq(1880, 1889, by = 2)) +
   # geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
-  geom_point(size = 1.5, colour = "#9D1C18") +
-  geom_line(colour = "#9D1C18") +
+  geom_point(size = 1.5, colour = "#A11D21") +
+  geom_line(colour = "#A11D21") +
   facet_wrap(~NameProduct, nrow = 2) +
   labs(x = "Ano", y = "Receita") +
   theme_estat()
@@ -246,7 +246,7 @@ colnames(tabela5)[1] <- "Produto"
 tabela5 %>% kable(digits = 2)
 ```
 
-\ \ \ \ Dos 10 produtos disponíveis, o **Cavalo** apresentou a maior média de receita, mesmo sendo o menos vendido. Esse resultado se deve ao elevado preço unitário do produto, de R\$ 2.981,99.  O **Chapéu de Couro** foi o item mais vendido na região, seguido pela **Espingarda** e pela **Colt .45**. É importante observar que a soma das quantidades vendidas das duas armas foi de 10.295 unidades, enquanto o total de **Munições** vendidas foi de apenas 4.862. Esse contraste pode indicar que os consumidores adquirem munições em outras regiões ou não sentem necessidade de comprá-las com frequência após a aquisição da arma. Além disso, nota-se que foram vendidas mais do que o dobro de **Selas** em relação ao número de **Cavalos**, o que pode sugerir que as **Selas** vendidas na região são de baixa qualidade ou mal cuidadas.
+\ \ \ \ Dos 10 produtos disponíveis, o **Cavalo** apresentou a maior média de receita, mesmo sendo o menos vendido. Esse resultado se deve ao elevado preço unitário do produto, de R\$ 2.981,99. O **Chapéu de Couro** foi o item mais vendido na região, seguido pela **Espingarda** e pela **Colt .45**. É importante observar que a soma das quantidades vendidas das duas armas foi de 10.295 unidades, enquanto o total de **Munições** vendidas foi de apenas 4.862. Esse contraste pode indicar que os consumidores adquirem munições em outras regiões ou não sentem necessidade de comprá-las com frequência após a aquisição da arma. Além disso, nota-se que foram vendidas mais do que o dobro de **Selas** em relação ao número de **Cavalos**, o que pode sugerir que as **Selas** vendidas na região são de baixa qualidade ou mal cuidadas.
 
 \newpage
 
@@ -276,7 +276,6 @@ relatorio_vendas %>%
 
 ```
 
-
 ```{r}
 #| echo: false
 #| results: asis
@@ -305,44 +304,55 @@ tabela8 %>% kable(digits = 2)
 
 ```{r}
 #| echo: false
-#| warning: false
+
+quadro1 <- relatorio_vendas %>% 
+  summarise(
+    Média = mean(peso_kg),
+    Mediana = median(peso_kg),
+    `Desvio Padrão` = sd(peso_kg),
+    Variância = var(peso_kg),
+    Mínimo = min(peso_kg),
+    Máximo = max(peso_kg),
+    `1º Quartil` = quantile(peso_kg, 0.25),
+    `3º Quartil` = quantile(peso_kg, 0.75)
+  ) %>% t()
+  
+  quadro2 <- relatorio_vendas %>% 
+  summarise(
+    Média = mean(altura_cm),
+    Mediana = median(altura_cm),
+    `Desvio Padrão` = sd(altura_cm),
+    Variância = var(altura_cm),
+    Mínimo = min(altura_cm),
+    Máximo = max(altura_cm),
+    `1º Quartil` = quantile(altura_cm, 0.25),
+    `3º Quartil` = quantile(altura_cm, 0.75)
+  ) %>% t()
 
 p_media <- mean(relatorio_vendas$peso_kg)
 p_sd <- sd(relatorio_vendas$peso_kg)
 h_media <- mean(relatorio_vendas$altura_cm)
 h_sd <- sd(relatorio_vendas$altura_cm)
 
-np_test <- ks.test(relatorio_vendas$peso_kg, "pnorm",
-                   mean = p_media,
-                   sd = p_sd)
-nh_test <- ks.test(relatorio_vendas$altura_cm, "pnorm",
-                   mean = h_media,
-                   sd = h_sd)
-
-p_est <- np_test$statistic
-h_est <- nh_test$statistic
-
 cor_test <- cor.test(relatorio_vendas$peso_kg, relatorio_vendas$altura_cm, conf.level = .95)
 cor_hat <- cor_test$estimate
 cor_IC <- cor_test$conf.int
+cor_pv <- cor_test$p.value
+cor_est <- cor_test$statistic
 
-quadro1 <- relatorio_vendas %>% 
-  summarize(`Média` = round(mean((peso_kg)),2),
-            `Desvio Padrão` = round(sd(peso_kg),2),
-            `Mínimo` = round(min(peso_kg),2),
-            `1º Quartil` = round(quantile(peso_kg, probs = .25),2),
-            `Mediana` = round(quantile(peso_kg, probs = .5),2),
-            `3º Quartil` = round(quantile(peso_kg, probs = .75),2),
-            `Máximo` = round(max(peso_kg),2)) %>% t()
+tabela9 <- data.frame(
+  `Média amostral` = c(p_media, h_media),
+  `Variância amostral` = c(p_sd^2, h_sd^2)
+) %>%
+  rownames_to_column("Variável") %>%
+  mutate(Variável = c("Peso", "Altura"))
 
-quadro2 <- relatorio_vendas %>% 
-  summarize(`Média` = round(mean((altura_cm)),2),
-            `Desvio Padrão` = round(sd(altura_cm),2),
-            `Mínimo` = round(min(altura_cm),2),
-            `1º Quartil` = round(quantile(altura_cm, probs = .25),2),
-            `Mediana` = round(quantile(altura_cm, probs = .5),2),
-            `3º Quartil` = round(quantile(altura_cm, probs = .75),2),
-            `Máximo` = round(max(altura_cm),2)) %>% t()
+tabela10 <- data.frame(
+  `Correlação de Pearson` = cor_hat,
+  `p-valor` = cor_pv,
+  `Estatística t` = cor_est,
+  `Intervalo de Confiança` = paste0("[", cor_IC[1], "; ", cor_IC[2], "]")) %>% 
+  t()
 ```
 
 \ \ \ \ O objetivo desta análise é investigar se existe relação linear entre o **peso** e a **altura** dos clientes, em que o peso foi convertido para quilogramas (multiplicando o valor em libras por 0.453592) e a altura convertido para centímetros (multiplicando o valor em decímetros por 10).
@@ -358,7 +368,7 @@ relatorio_vendas %>%
   geom_point(colour = "#A11D21", alpha = .3) +
   # geom_jitter(width = .5, height = .5, colour = "#A11D21", alpha = .3) +
   labs(x = "Peso (kg)", y = "altura (cm)") +
-  theme_estat()
+  theme_estat() 
 ```
 
 \newpage
@@ -372,6 +382,7 @@ cat("Quadro 1: Principais métricas do peso (kg)\n\n")
 colnames(quadro1) <- "Valor"
 quadro1 %>% as.data.frame() %>% rownames_to_column("Estatística") %>% kable(digits = 2)
 ```
+
 \vspace{.2cm}
 
 ```{r}
@@ -384,42 +395,97 @@ colnames(quadro2) <- "Valor"
 quadro2 %>% as.data.frame() %>% rownames_to_column("Estatística") %>% kable(digits = 2)
 ```
 
-\ \ \ \ Para realizar a análise, primeiro foram realizados dois testes de aderência de Kolmogorov–Smirnov a fim de verificar normalidade das variáveis. As hipóteses nulas $H_{0}$ consideram que o **peso** dos clientes provém de uma população normalmente distribuída com média igual a 75.21048 e variância igual a 140.4506, e que a **altura** dos clientes provém de uma população normalmente distribuída com média igual a 171.0633 e  variância igual a 97.70323. As hipóteses alternativas $H_{1}$ afirmam que os dados não seguem essas distribuições propostas. As estatísticas de teste foram $D_{p} = 0.01888389$ e $D_{t} = 0.01577982$, com p-valores de $1.3 \times 10^{-6}$ e $1.0 \times 10^{-4}$, respectivamente, sugerindo que os dados seguem uma distribuição aproximadamente normal. Nos gráficos seguintes podemos observar melhor a suposição de normalidade.
+\ \ \ \ Para realizar a análise, primeiro foi verificado a suposição de normalidade das variáveis **peso** e **alutra** analisando a comparação gráfica entre a densidade empírica observada e a densidade teórica de uma distribuição normal, com parâmetros méida $\mu = \bar{x}$ e variância $\sigma^2 = s^2$, estimados separadamente para cada variável. Foram utilizados os valores de $\bar{x}_{peso}$ e $s^2_{peso}$ para a variável peso, e de $\bar{x}_{altura}$ e $s^2_{altura}$ para a variável altura (ver Quadros 1 e 2).
+
+\ \ \ \ Além disso, a suposição de normalidade foi avaliada também por meio da análise dos quantis, comparando os quantis observados com os quantis teóricos da distribuição normal.
 
 ```{r}
 #| echo: false
 #| label: fig-grafico-7
-#| fig-cap: Verificação da suposição de normalidade para a variável peso
+#| fig-cap: Distribuição empírica e normal teórica do peso
 
 relatorio_vendas %>% 
   ggplot(aes(x = peso_kg)) +
-  geom_histogram(aes( y = ..density..), binwidth = 5, fill = "#A11D21", colour = "white") +
-  labs(x = "Peso (kg)", y = "Densidade") +
-  stat_function(fun = dnorm,
-                args = list(mean = mean(relatorio_vendas$peso_kg),
-                            sd = sd(relatorio_vendas$peso_kg)),
-                colour = "#003366", size = 1, linetype = "dashed") +
-  theme_estat()
+  geom_histogram(aes( y = ..density.., fill = "Distribuição empírica"),
+                 binwidth = 5, colour = "white") +
+  stat_function(
+    fun = dnorm,
+    args = list(mean = mean(relatorio_vendas$peso_kg),
+                sd = sd(relatorio_vendas$peso_kg)),
+    aes(colour = "Distribuição teórica"),
+    size = 1.2, linetype = "dashed") +
+  labs(x = "Peso (kg)", y = "Densidade", fill = NULL, colour = NULL) +
+  theme_estat() +
+  scale_colour_manual(values = c("Distribuição teórica" = "#003366"))
 ```
 
 ```{r}
 #| echo: false
 #| label: fig-grafico-8
-#| fig-cap: Verificação da suposição de normalidade para a variável altura
+#| fig-cap: Distribuição empírica e normal teórica da altura
 
 relatorio_vendas %>% 
   ggplot(aes(x = altura_cm)) +
-  geom_histogram(aes( y = ..density..), binwidth = 5, fill = "#A11D21", colour = "white") +
-  labs(x = " altura (cm)", y = "Densidade") +
-  stat_function(fun = dnorm,
-                args = list(mean = mean(relatorio_vendas$altura_cm),
-                            sd = sd(relatorio_vendas$altura_cm)),
-                colour = "#003366", size = 1, linetype = "dashed") +
-  theme_estat()
+  geom_histogram(aes( y = ..density.., fill = "Distribuição empírica"),
+                 binwidth = 5, colour = "white") +
+  stat_function(
+    fun = dnorm,
+    args = list(mean = mean(relatorio_vendas$altura_cm),
+                sd = sd(relatorio_vendas$altura_cm)),
+    aes(colour = "Distribuição teórica"),
+    size = 1.2, linetype = "dashed") +
+  labs(x = "Altura (cm)", y = "Densidade", fill = NULL, colour = NULL) +
+  theme_estat() +
+  scale_colour_manual(values = c("Distribuição teórica" = "#003366"))
 ```
 
-\ \ \ \ Em seguida, após a verificação da normalidade das variáveis, aplicou-se o teste de correlação de Pearson sob a hipótese nula $H_{0}: \rho = 0$ contra a hipótese alternativa $H_{1}: \rho \neq 0$, ao nível de significância de 5%. O resultado obtido foi $\text{p-valor} < 2.2 \times 10^{-16}$, indicando evidência significativa de correlação linear entre as variáveis. O estimador do coeficiente de correlação foi $\hat{\rho} = 0.6931284$, e o intervalo de confiança a 95% foi dado por $IC_{\rho;\ 0.95} = [0.6858365;\ 0.7002811]$.
-\ \ \ \ O estimador da correlação de Pearson ($0.5 < \hat{\rho} < 0.7$) indica, na população de clientes, uma relação linear positiva moderada, quase alta, entre o **peso** e a **altura**. Isso é, à medida que a altura dos clientes aumenta, o peso também tende a aumentar. O $\text{p-valor}$ muito baixo fornece evidência estatistica que a correlação linear é não nula, sugerindo que que a relação observada dificilmente ocorreu ao acaso. O intervalo de confiança indica que a verdadeira correlação populacional provavelmente está entre $[0.6858; 0.7003]$. Assim, podemos conlcuir que em geral, **clientes mais altos pesam mais**.
+```{r}
+#| echo: false
+#| label: fig-grafico-9
+#| fig-cap: Q-Q plot do peso
+
+qqnorm(relatorio_vendas$peso_kg, ylab = "Quantis amostrais",
+       xlab = "Quantis teóricos",
+       main = NULL)
+qqline(relatorio_vendas$peso_kg, col = "#A11d21", lwd = 2)
+```
+
+```{r}
+#| echo: false
+#| label: fig-grafico-10
+#| fig-cap: Q-Q plot da altura
+
+qqnorm(relatorio_vendas$altura_cm, ylab = "Quantis amostrai",
+       xlab = "Quantis teóricos",
+       main = NULL)
+qqline(relatorio_vendas$altura_cm, col = "#A11D21", lwd = 2)
+```
+
+
+\ \ \ \ Em seguida, após a verificação da normalidade das variáveis, foi realizado o teste de correlação de Pearson ao nível de significância de 5% sob as seguintes hipóteses.
+
+```{=latex}
+\begin{center}
+\hipoteses{$\rho = 0$}{$\rho \neq 0$}
+\end{center}
+```
+
+\ \ \ \ Sob $H_0$, foi obtido um p-valor $< 2.2 \times 10^{-16}$, indicando evidência significativa de correlação linear entre as variáveis. O estimador do coeficiente de correlação, o p-valor, a estatística do teste e o intervalo de confiança a 95% estão na seguinte tabela.
+
+\newpage
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-7
+#| tbl-cap: "Resultados da correlação de Pearson entre peso e altura"
+
+colnames(tabela10) <- ""
+rownames(tabela10) <- c("$\\hat{\\rho}$", "p-valor", "Estatística t", "$IC_{\\rho;\\,95\\%}$")
+tabela10 %>% kable(escape = FALSE)
+```
+
+\ \ \ \ O estimador da correlação de Pearson ($0.5 < \hat{\rho} < 0.7$) indica que na população de clientes há uma relação linear positiva moderada, quase alta, entre o **peso** e a **altura**. Isso é, à medida que a altura dos clientes aumenta, o peso também tende a aumentar. O p-valor muito baixo fornece evidência estatistica que a correlação linear é não nula, sugerindo que que a relação observada dificilmente ocorreu ao acaso. O intervalo de confiança indica que com 95% de confiança no procedimento de estimação, o valor verdadeiro da correlação populacional estaria coberto pelo intervalo $[0.6858; 0.7003]$. Assim, podemos conlcuir que em geral, **clientes mais altos pesam mais**.
 
 <!-- ## Análise Extra -->
 
@@ -428,59 +494,70 @@ relatorio_vendas %>%
 <!-- \ \ \ \ O objetivo desta análise é examinar mais detalhadamente o **Índice de Massa Corporal (IMC)** dos **clientes**, considerando também a diferença por **gênero**. -->
 
 <!-- ```{r} -->
+
 <!-- #| echo: false -->
+
 <!-- #| label: fig-grafico-9 -->
 
 <!-- relatorio_vendas %>% -->
+
 <!--   ggplot(aes(x = IMC)) + -->
+
 <!--   geom_histogram(binwidth = 1, fill = "#A11D21", colour = "white") + -->
+
 <!--   labs(x = "IMC", y = "Frequência", title = "Distribuição do IMC dos clientes") + -->
+
 <!--   theme_estat() -->
+
 <!-- ``` -->
 
 <!-- ```{r} -->
+
 <!-- #| echo: false -->
+
 <!-- #| label: fig-grafico-10 -->
 
 <!-- relatorio_vendas %>% -->
+
 <!--   ggplot(aes(x = IMC)) + -->
+
 <!--   geom_histogram(binwidth = 1, aes(fill = Sex), colour = "white", position = "dodge") + -->
+
 <!--   labs(x = "IMC", y = "Frequência", title = "Distribuição do IMC dos clientes por gênero", fill = "Gênero") + -->
+
 <!--   theme_estat() -->
+
 <!-- ``` -->
 
-
-
 ## Análise 3
-
 
 # Conclusão
 
 # Anexo
 
-1. Dicionário das variáveis do banco de dados
+1.  Dicionário das variáveis do banco de dados
 
-- ClienteID: Chave do cliente 
-- Name: O nome do cliente 
-- Age: A idade do cliente em anos 
-- Sex: Sexo do Cliente 
-- Height_dm: A altura do cliente em decímetros 
-- Weight_lbs: O peso do cliente, em libras 
-- Anual_Income_usd: Renda do cliente anualmente em dólares 
-- CityID: Chave da cidade 
-- NameCity: Nome da cidade 
-- EmployeeID: Chave do funcionário 
-- EmployeeName: Nome do funcionário 
-- StoreID: Chave da loja 
-- StoreName: Nome da loja 
-- CityID: Chave da cidade 
-- ItemID: Chave do produto 
-- NameProduct: Nome do produto 
-- UnityPrice: Preço unitário do produto em dólores 
-- SaleID: Chave da venda 
-- ItemID: Chave do produto 
-- SaleID: Chave da venda 
-- Date: A data da ocorrência da venda (YYYY-MM-DD) 
-- StoreID: Chave da loja 
-- ClientID: Chave do cliente 
-- Quantity: Quantidade comprada deste produto
+-   ClienteID: Chave do cliente
+-   Name: O nome do cliente
+-   Age: A idade do cliente em anos
+-   Sex: Sexo do Cliente
+-   Height_dm: A altura do cliente em decímetros
+-   Weight_lbs: O peso do cliente, em libras
+-   Anual_Income_usd: Renda do cliente anualmente em dólares
+-   CityID: Chave da cidade
+-   NameCity: Nome da cidade
+-   EmployeeID: Chave do funcionário
+-   EmployeeName: Nome do funcionário
+-   StoreID: Chave da loja
+-   StoreName: Nome da loja
+-   CityID: Chave da cidade
+-   ItemID: Chave do produto
+-   NameProduct: Nome do produto
+-   UnityPrice: Preço unitário do produto em dólores
+-   SaleID: Chave da venda
+-   ItemID: Chave do produto
+-   SaleID: Chave da venda
+-   Date: A data da ocorrência da venda (YYYY-MM-DD)
+-   StoreID: Chave da loja
+-   ClientID: Chave do cliente
+-   Quantity: Quantidade comprada deste produto
