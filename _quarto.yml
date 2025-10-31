@@ -3,7 +3,7 @@ project:
   output-dir: resultados/
 
 
-lang: pt
+lang: pt-BR
 format: 
   pdf:
     geometry: 

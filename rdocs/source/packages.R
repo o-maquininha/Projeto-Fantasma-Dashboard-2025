@@ -152,3 +152,62 @@ print_quadro_resumo <- function(data, var_name, title="Medidas resumo da(o) [nom
   
   writeLines(latex)
 }
+
+# Quadro simples
+
+quadro_simples <- function(data, var_name, digits = 2) {
+  var_name <- substitute(var_name)
+  
+  data <- data %>%
+    summarize(
+      `Média` = round(mean(!!sym(var_name)), digits),
+      `Desvio Padrão` = round(sd(!!sym(var_name)), digits),
+      `Variância` = round(var(!!sym(var_name)), digits),
+      `Mínimo` = round(min(!!sym(var_name)), digits),
+      `1º Quartil` = round(quantile(!!sym(var_name), probs = .25), digits),
+      `Mediana` = round(quantile(!!sym(var_name), probs = .5), digits),
+      `3º Quartil` = round(quantile(!!sym(var_name), probs = .75), digits),
+      `Máximo` = round(max(!!sym(var_name)), digits)
+    )
+  
+  col_count <- ncol(data)
+  
+  latex <- str_c(
+    "|Estatística       |        Valor|\n",
+    "|:-------------|---------:|\n"
+  )
+  
+  for (i in seq_len(col_count)) {
+    latex <- str_c(
+      latex,
+      "|", colnames(data)[i], " | ", data[[i]], "|\n"
+    )
+  }
+  
+  writeLines(latex)
+}
+
+print_quadro_simples <- function(data, var_name,
+                                   title = "Principais métricas do(a) [nome da variável]",
+                                   digits = 2, cb = FALSE) {
+  var_name <- deparse(substitute(var_name))
+  title <- str_replace(title, "\\[nome da variável\\]", var_name)
+  
+  chunk <- str_c(
+    "```{r}\n",
+    "#| echo: false\n",
+    "#| results: asis\n\n",
+    "cat(\"Quadro: ", title, "\\n\\n\")\n\n",
+    "quadro_simples(", deparse(substitute(data)), ", ", var_name, ", digits = ", digits, ")\n",
+    "```"
+  )
+  
+  if (!cb) {
+    writeLines(chunk)
+  } 
+  
+  else {
+    writeClipboard(chunk)
+    message("o chunck está no Cntrl + V")
+  }
+}

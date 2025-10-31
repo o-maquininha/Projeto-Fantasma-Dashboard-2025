@@ -62,9 +62,12 @@ Esse template foi criado para o alocado conseguir observar como ficaria sua aná
 
 # Introdução
 
+\ \ \ \ João Sábio, proprietário da Old Town Road.Ltda, uma holding que controla diversas empresas ligadas ao comércio no faroeste, nos contratou para realizar análises estatísticas que visam compreender melhor o mercado em certa região em que ele tem o interesse de investir. Nesse relatório serão abordadas as análises de interesse do cliente: a receita média das lojas registrada nos anos de 1880 até 1889, variação Peso por Altura, idade dos clientes de Âmbar Seco a depender da loja e o top 3 produtos mais vendidos nas top 3 lojas com maior receita em
+1889.
+
 # Método
 
-\ \ \ \ Neste estudo, serão utilizados dados fictícios fornecidos pela ESTAT - Consultoria Estatística, com o objetivo de avaliar o nível de conhecimento do Trainee. Foram aplicados os seguintes métodos descritivos e inferenciais: \[...\] para a análise das variáveis em estudo (conferir Anexo 1).
+\ \ \ \ Neste estudo, serão utilizados dados fictícios fornecidos pela ESTAT - Consultoria Estatística, com o objetivo de avaliar o nível de conhecimento do Trainee. Conferir Anexo 1 com o dicionário das variáveis em estudo.
 
 # Análises
 
@@ -140,7 +143,6 @@ tabela8 <- tabela1 %>%
 \ \ \ \ O objetivo desta análise é compreender o comportamento das **lojas** ao longo da série temporal por meio da **receita anual** e da **receita média**. A receita anual corresponde à soma da quantidade vendida multiplicada pelo preço unitário de cada item comercializado em determinado ano, enquanto a receita média é a soma da receita anual dividido pela quantidade de lojas na região. Foram utilizados gráficos de dispersão para facilitar a visualização e a análise dos dados. Na Figura 1, o gráfico é apresentado em facetas e mostra a receita anual de cada loja, com o ano no eixo x e a receita total anual no eixo y. Já na Figura 2, o gráfico apresenta a receita média. A Tabela 1 apresenta a média, a mediana e o desvio-padrão da receita de cada loja em todo o período, enquanto a Tabela 2 mostra a receita média em reais ao longo dos anos de 1880 a 1889.
 
 \vspace{.2cm}
-
 ```{r}
 #| echo: false
 #| label: fig-grafico-1
@@ -377,10 +379,8 @@ tabela9 <- data.frame(
 
 tabela10 <- data.frame(
   `Correlação de Pearson` = cor_hat,
-  `p-valor` = cor_pv,
-  `Estatística t` = cor_est,
-  `Intervalo de Confiança` = paste0("[", cor_IC[1], "; ", cor_IC[2], "]")) %>% 
-  t()
+  `p-valor` = 0,
+  `Estatística t` = cor_est) %>% t()
 ```
 
 \ \ \ \ O objetivo desta análise é investigar se existe relação linear entre o **peso** e a **altura** dos clientes, em que o peso foi convertido para quilogramas (multiplicando o valor em libras por 0,453592) e a altura convertido para centímetros (multiplicando o valor em decímetros por 10).
@@ -401,27 +401,57 @@ aux %>%
 
 \newpage
 
-```{r}
-#| echo: false
-#| results: asis
-
-cat("Quadro 1: Principais métricas do peso (kg)\n\n")
-
-colnames(quadro1) <- "Valor"
-quadro1 %>% as.data.frame() %>% rownames_to_column("Estatística") %>% kable(digits = 2)
-```
+Quadro 1: Principais métricas do peso dos clientes
 
 \vspace{.2cm}
-
-```{r}
-#| echo: false
-#| results: asis
-
-cat("Quadro 2: Principais métricas da altura (cm)\n\n")
-
-colnames(quadro2) <- "Valor"
-quadro2 %>% as.data.frame() %>% rownames_to_column("Estatística") %>% kable(digits = 2)
+```{=latex}
+\begin{center}
+\begin{tabular} { | l |
+			S[table-format = 2.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 75,19 \\
+		Desvio Padrão & 11,92 \\
+		Variância & 142 \\
+		Mínimo & 45 \\
+		1º Quartil & 66,9 \\
+		Mediana & 75,3 \\
+		3º Quartil & 83,2 \\
+		Máximo & 119,3 \\
+	\hline
+\end{tabular}
+\end{center}
 ```
+\vspace{.2cm}
+
+Quadro 2: Principais métricas da altura dos clientes
+
+\vspace{.2cm}
+```{=latex}
+\begin{center}
+\begin{tabular} { | l |
+			S[table-format = 1.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 171,48 \\
+		Desvio Padrão & 9,87 \\
+		Variância & 97,38 \\
+		Mínimo & 150 \\
+		1º Quartil & 164,8 \\
+		Mediana & 171,75 \\
+		3º Quartil & 178 \\
+		Máximo & 200 \\
+	\hline
+\end{tabular}
+\end{center}
+```
+\vspace{.2cm}
+
+\ \ \ \ Ao observar o gráfico de dispersão entre **peso** e **altura**, nota-se de imediato uma relação positiva entre as variáveis, assim como uma alta variabilidade. A medida que o peso aumenta a altura tende a aumentar e os pontos estão bem espalhados, indicando que, embora exista uma correlação positiva, o peso varia bastante mesmo entre clientes com estaturas semelhantes.
 
 \ \ \ \ Para realizar a análise, primeiro foram realizados dois testes de aderência de Lilliefors, a fim de verificar normalidade das variáveis **peso** e **altura**. As hipóteses nulas $H_0$ consideram que o peso dos clientes provém de uma população normalmente distribuída com média igual a 75,18849 e variância igual a 141,9977, e que a altura dos clientes provém de uma população normalmente distribuída com média igual a 171,4808 e variância igual a 97,37976. As hipóteses alternativas $H_1$ afirmam que os dados não seguem essas distribuições propostas. Os parâmetros de média e variância utilizados nessas distribuições correspondem às médias e variâncias amostrais da respectiva variável (ver Quadros 1 e 2).
 
@@ -525,8 +555,21 @@ qqline(aux$altura_cm, col = "red", lwd = 2)
 #| tbl-cap: Resultados da correlação de Pearson entre peso e altura
 
 colnames(tabela10) <- ""
-rownames(tabela10) <- c("$\\hat{\\rho}$", "p-valor", "Estatística t", "$IC(\\rho)_{95\\%}$")
+rownames(tabela10) <- c("$\\hat{\\rho}$", "p-valor", "Estatística t")
 tabela10 %>% kable(escape = FALSE)
+```
+
+
+```{=latex}
+\begin{center}
+    \begin{tabular}{|c I|}
+        \toprule
+        \textbf{Parâmetro} & \textbf{Intervalo de Confiança (95\%)} \\
+        \midrule
+        $\rho$ & \interval{0.6737991}{0.7190173} \\ % substitua o "a" pelo limite inferior e o "b" pelo limite superior
+        \bottomrule
+    \end{tabular}
+\end{center}
 ```
 
 \ \ \ \ O estimador da correlação de Pearson ($0,5 < \hat{\rho} < 0,7$) indica que na população de clientes há uma relação linear positiva moderada, quase alta, entre o **peso** e a **altura**. Isso é, à medida que a altura dos clientes aumenta, o peso também tende a aumentar. O p-valor muito baixo fornece evidência estatistica que a correlação linear é não nula, sugerindo que que a relação observada dificilmente ocorreu ao acaso. O intervalo de confiança indica que com 95% de confiança no procedimento de estimação, o valor verdadeiro da correlação populacional estaria dentro do intervalo $[0,6737991; 0,7190173]$. Assim, podemos conlcuir que em geral, **clientes mais altos pesam mais**.
@@ -592,7 +635,6 @@ quadro3 %>% as.data.frame() %>% rownames_to_column("Estatística") %>% kable(dig
 aux %>%
   ggplot(aes(x = FaixaPeso)) +
   geom_bar(fill = "#A11D21", colour = "white") +
-  coord_flip() +
   labs(x = "Faixa de Peso", y = "Frequência", title = "Distribuição das faixas de peso dos clientes") +
   theme_estat()
 ```
@@ -639,7 +681,6 @@ ambar_seco %>%
   group_by(NameStore, Age) %>%
   ggplot(aes(NameStore, Age)) +
   geom_boxplot(fill = "#A11D21") +
-  coord_flip() +
   labs(x = "Loja", y = "Idade") +
   theme_estat()
 ```
@@ -654,11 +695,88 @@ colnames(tabela11)[1] <- "Loja"
 tabela11 %>% kable(digits = 2)
 ```
 
-\ \ \ \ Da Figura 10, e da disntância interquantílica na Tabela 11, podemos observar que as lojas **Vendinha Rápida** e **Banco Careca** apresentam uma distribuição de idades de clientes mais concentrada. Enquanto as lojas **Saloon** e **Ferraria Seca** possuem maior variação na idade dos clientes. A loja **Vendinha Rápida**se destaca por apresentar a maior média e mediana de idade, indicando que seus clientes tendem a ser mais velhos em comparação às demais lojas na cidade de Âmbar Seco. Por outro lado, a **Ferraria Seca** apresentou menor média e mediana, sugerindo um público mais jovens. No entando, o maior desvio padrão e maior disntância interquantílica, indicam que o perfil étario dos clientes é mais vasto e heterogênio.
+\ \ \ \ Da Figura 10, e da disntância interquantílica na Tabela 11, podemos observar que as lojas **Vendinha Rápida** e **Banco Careca** apresentam uma distribuição de idades de clientes mais concentrada. Isso pode ser visto pelo menor tamanho das caixas no boxplot, e pelos menores valores de DIQ. Enquanto as lojas **Saloon** e **Ferraria Seca** possuem maior variação na idade dos clientes. Possuem caixas maiores e maiores valores de DIQ. A loja **Vendinha Rápida** se destaca por apresentar a maior média e mediana de idade, indicando que seus clientes tendem a ser mais velhos em comparação às demais lojas na cidade de Âmbar Seco. Por outro lado, a **Ferraria Seca** apresentou menor média e mediana, sugerindo um público mais jovens, no entando, o maior desvio padrão e maior disntância interquantílica, indicam que o perfil étario dos clientes é mais vasto e heterogênio.
 
-# Análise 4
+## Análise 4
+
+```{r}
+#| echo: false
+
+
+tabela12 <- relatorio_vendas %>%
+  group_by(NameStore) %>%
+  summarize(receitaLoja = sum(receitaVenda)) %>%
+  arrange(desc(receitaLoja))
+
+top3_lojas <- tabela12 %>%
+  slice(1:3) %>%
+  pull(NameStore)
+
+aux2 <- relatorio_vendas %>% 
+  select(NameStore, NameProduct, Quantity,ano, receitaVenda) %>%
+  group_by(NameStore) %>% 
+  mutate(receitaLoja = sum(receitaVenda)) %>% 
+  distinct() %>%
+  filter(ano == 1889, NameStore %in% top3_lojas)
+
+tabela13 <- aux2 %>% 
+  group_by(NameProduct) %>%
+  summarize(quantidadeVendida = sum(Quantity)) %>%
+  arrange(desc(quantidadeVendida))
+
+top3_produtos <- tabela13 %>%
+  slice(1:5) %>%
+  pull(NameProduct)
+
+tabela14 <- aux2 %>%
+  filter(NameProduct %in% top3_produtos) %>%
+  group_by(NameStore, NameProduct) %>%
+  summarise(
+    quantidadeVendida = sum(Quantity)
+  ) %>%
+  arrange(NameStore, desc(quantidadeVendida))
+```
+
+\ \ \ \ Por fim, o objetivo desta análise é identificar os três **produtos mais vendidos** nas três **lojas com maior receita** no ano de 1889.
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-11
+#| tbl-cap: Lojas com maior receita em 1889
+
+colnames(tabela12)[c(1, 2)] <- c("Loja", "Receita")
+tabela12 %>% slice(1:3) %>% kable()
+```
+
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-12
+#| tbl-cap: Produtos mais vendidos em 1889
+
+colnames(tabela13) <- c("Produto", "Quantidade Vendida")
+tabela13 %>% kable()
+```
+
+\newpage
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-13
+#| tbl-cap: Produtos mais vendidos nas lojas com maior receita em 1889
+
+colnames(tabela14)[c(1, 2)] <- c("Loja", "Produto", "Quantidade Vendida")
+tabela14 %>% kable() %>% collapse_rows(columns = 1)
+```
+
+\ \ \ \ As lojas com maior receita em 1889 foram **Ferraria Apache**, **Loja Ouro Fino** e **Loja TendTudo**. O produtos mais vendido nessas lojas foi o **Chapéu de Couro**, que contabilizou 32 vendas. Empatados para segundo lugar foram as **Botas de Couro**, a **Espingarda**, a **Sela** e o **Whisky**, com 30 vendas. O **Chapéu de Couro** foi o produto mais popular (ou empatou com o produto mais popular) nas três lojas com maior receita no ano de 1889. Esses resultados sugerem que os clientes têm preferência pelo chapeu, porém é importante notar que a diferença da quantidade de itens vendidos é baixa, variando apenas por uma ou duas unidades entre o item mais vendido e o segundo mais vendido (ver Tabelas 13 e 14).
 
 # Conclusão
+
+\ \ \ \ A região mostrou-se muito promissora para investimentos, com crescimento expressivo na receita média ao longo do período analisado. A análise dos produtos revelou que itens como o **Cavalo** e o **Chapéu de Couro** tiveram destaque em termos de receita e quantidade vendida, respectivamente. As cidades da região também apresentaram crescimento econômico significativo, com **Rio Bravo** liderando nesse aspecto. Também foi verificado que o peso e a altura dos clientes está positivamente correlacionada. As lojas de **Âmbar Seco** possuem lojas com maior concentração de idade, e lojas mais heterogêneas quanto a faixa etária. E por fim, podemos observar que no ultimo ano dá série historica em análise, o **Chapeu de Coro** foi o item mais vendido das lojas que tiverem maior receita no ano, mesmo que apenas por duas unidades.
 
 # Anexo
 
