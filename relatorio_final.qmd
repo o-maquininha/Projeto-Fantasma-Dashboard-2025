@@ -309,10 +309,6 @@ $$ P(t_{1} < \theta < t_{2}) = \gamma $$
 
 A probabilidade $\gamma$ é estabelecida no início do estudo e representa o nível de confiança do intervalo. A interpretação desse resultado é que, se forem tiradas várias amostras de mesmo tamanho e forem calculados intervalos de confiança para cada uma, $100 \times \gamma \%$ dos intervalos irão conter o parâmetro $\theta$. Assim, ao calcular um intervalo, pode-se dizer que há $100 \times \gamma \%$ de confiança de que o intervalo contém o parâmetro de interesse.
 
-# Teste de Normalidade
-
-Os testes de normalidade são utilizados para verificar se uma variável aleatória segue um distribuição Normal de probabilidade ou não. Eles são muito importantes, pois impactam em qual teste deve ser utilizado em uma análise futura. Se o resultado do teste confirmar que a variável segue uma distribuição normal, procedimentos paramétricos podem e devem ser utilizados. Caso contrário, os métodos não paramétricos são mais recomendados.
-
 ## Teste de Normalidade de Lilliefors
 
 Assim como o teste de Kolmogorov-Smirnov, o **teste de Lilliefors** é utilizado para verificar se um conjunto de dados $X_1, X_2, ..., X_n$ de tamanho $n$ segue determinada distribuição. A estatística de teste para este teste é dada por:
