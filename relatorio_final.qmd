@@ -435,7 +435,7 @@ tabela8 <- tabela1 %>%
 
 ```
 
-\ \ \ \ O objetivo desta análise é compreender o comportamento das **lojas** ao longo da série temporal por meio da **receita anual** e da **receita média**. A receita anual corresponde à soma da quantidade vendida multiplicada pelo preço unitário de cada item comercializado em determinado ano, enquanto a receita média é a soma da receita anual dividido pela quantidade de lojas na região (18), ambas são variáveis **quantitativas contínuas**, por esse motivo foi utilizado gráficos de dispersão. Por outro lado, a loja é uma variável **qualitativa nominal**. Foram utilizados gráficos de dispersão para facilitar a visualização e a análise dos dados. Na Figura 1, o gráfico é apresentado em facetas e mostra a receita anual de cada loja, com o ano no eixo x e a receita total anual no eixo y. Já na Figura 2, o gráfico apresenta a receita média. A Tabela 1 apresenta a média, a mediana e o desvio-padrão da receita de cada loja em todo o período, enquanto a Tabela 2 mostra a receita média em reais ao longo dos anos de 1880 a 1889.
+\ \ \ \ O objetivo desta análise é compreender o comportamento das **lojas** ao longo da série temporal por meio da **receita anual** e da **receita média**. A receita anual corresponde à soma da quantidade vendida multiplicada pelo preço unitário de cada item comercializado em determinado ano, enquanto a receita média é a soma da receita anual dividido pela quantidade de lojas na região (18). Ambas são variáveis **quantitativas contínuas**, por esse motivo foi utilizado gráficos de dispersão. Por outro lado, a loja é uma variável **qualitativa nominal**. Foram utilizados gráficos de dispersão para facilitar a visualização e a análise dos dados. Na Figura 1, o gráfico é apresentado em facetas e mostra a receita anual de cada loja, com o ano no eixo x e a receita total anual no eixo y. Já na Figura 2, o gráfico apresenta a receita média. A Tabela 1 apresenta a média, a mediana e o desvio-padrão da receita de cada loja em todo o período, enquanto a Tabela 2 mostra a receita média em reais ao longo dos anos de 1880 a 1889.
 
 \vspace{.2cm}
 ```{r}
@@ -510,7 +510,7 @@ tabela3 %>% kable(digits = c(0, 2))
 
 ## Análise dos produtos (Extra)
 
-\ \ \ \ O objetivo desta análise é examinar mais detalhadamente a **receita anual** e a **receita méida** por **produto** na região, bem como a **quantidade vendida**, produtos é variável **qualitativa nominal**.
+\ \ \ \ O objetivo desta análise é examinar mais detalhadamente a **receita anual** e a **receita méida** por **produto** na região, bem como a **quantidade vendida**. Produtos é variável **qualitativa nominal**.
 
 ```{r}
 #| echo: false
@@ -560,7 +560,7 @@ tabela5 %>% kable(digits = 2)
 
 ## Análise das cidades (Extra)
 
-\ \ \ \ Nessa análise iremos aprofundar o entendimento de cada **cidade** observando a **receita anual** e a **receita média** assim como a **taxa de crescimento econômico**, que foi calculada pela diferença das receitas nos anos de 1889 e 1880, dividido pela receita em 1880, cidade é variável **qualitativa nominal** e taxa de crescimento econômico é variável **quantitativa contínua**.
+\ \ \ \ Nessa análise iremos aprofundar o entendimento de cada **cidade** observando a **receita anual** e a **receita média** assim como a **taxa de crescimento econômico**, que foi calculada pela diferença das receitas nos anos de 1889 e 1880, dividido pela receita em 1880. Cidade é variável **qualitativa nominal** e Taxa de Crescimento Econômico é variável **quantitativa contínua**.
 
 ```{r}
 #| echo: false
@@ -678,7 +678,7 @@ tabela10 <- data.frame(
   `Estatística t` = cor_est) %>% t()
 ```
 
-\ \ \ \ O objetivo desta análise é investigar se existe relação linear entre o **peso** e a **altura** dos clientes, em que o peso foi convertido para quilogramas (multiplicando o valor em libras por 0,453592) e a altura convertido para centímetros (multiplicando o valor em decímetros por 10), ambas variáveis são **quantitativas continuas**.
+\ \ \ \ O objetivo desta análise é investigar se existe relação linear entre o **peso** e a **altura** dos clientes, em que o peso foi convertido para quilogramas (multiplicando o valor em libras por 0,453592) e a altura convertido para centímetros (multiplicando o valor em decímetros por 10). Ambas variáveis são **quantitativas continuas**.
 
 ```{r}
 #| echo: false
@@ -895,7 +895,7 @@ tabela13 <- aux %>%
   arrange(desc(frequencia))
 ```
 
-\ \ \ \ O objetivo desta análise é examinar em maior detalhe o **Índice de Massa Corporal (IMC)** e a **Faixa de Peso** dos clientes, obtido a partir da relação entre o peso em quilogramas e o quadrado da altura em metros (conferir Anexo 3 e 4), IMC é variavél **quantitativa contínua** e Faixa de Peso é **qualitativa ordinal**.
+\ \ \ \ O objetivo desta análise é examinar em maior detalhe o **Índice de Massa Corporal (IMC)** e a **Faixa de Peso** dos clientes, obtido a partir da relação entre o peso em quilogramas e o quadrado da altura em metros (conferir Anexo 3 e 4). IMC é variavél **quantitativa contínua** e Faixa de Peso é **qualitativa ordinal**.
 
 ```{r}
 #| echo: false
@@ -980,7 +980,7 @@ tabela11 <- ambar_seco %>%
   arrange(desc(Média)) #%>% View
 ```
 
-\ \ \ \ Para esta análise, o objetivo é examinar a distribuição da **idade** dos **clientes** por **lojas** na cidade de **Âmbar Seco**, em que idade é variável **quantitativa discreta** e clientes é variável **qualitativa nominal**.
+\ \ \ \ Para esta análise, o objetivo é examinar a distribuição da **idade** dos **clientes** por **lojas** na cidade de **Âmbar Seco**. Idade é variável **quantitativa discreta** e Clientes é variável **qualitativa nominal**.
 
 ```{r}
 #| echo: false
