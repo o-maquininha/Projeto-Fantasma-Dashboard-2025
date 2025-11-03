@@ -1,19 +1,1138 @@
 ---
-title: "Modelo Projeto - Quarto"
-
-# Nome do documento PDF gerado
-output-file: titulo do projeto
+# Nome do arquivo PDF gerado na pasta resultado
+output-file: "Entrega 1"
 ---
 
-```{r}
+```{r setup}
 #| include: false
-source("rdocs/packages.R")
+source("rdocs/entrega_1.R")
+knitr::opts_chunk$set(echo = TRUE, cache=T, message=F, warning=F, error=F)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load("readxl", "tidyverse", "knitr", "kableExtra")
+options(scipen=0)
+```
+
+```{r echo=FALSE}
+source("rdocs/source/packages.R")
+
+faixa_peso <- function(imc){
+  if(imc < 18.5){
+    return("Abaixo do peso")
+  } else if(imc >= 18.5 & imc < 24.9){
+    return("Peso normal")
+  } else if(imc >= 25 & imc < 29.9){
+    return("Sobrepeso")
+  } else {
+    return("Obesidade")
+  }
+}
+
+relatorio_vendas <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "relatorio_vendas")
+info_vendas <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_vendas")
+info_produtos <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_produtos")
+info_funcionarios <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_funcionarios")
+info_cidades <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_cidades")
+info_clientes <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_clientes")
+info_lojas <- read_excel(path = "relatorio_old_town_road.xlsx", sheet = "infos_lojas")
+
+relatorio_vendas$Date <- ymd(relatorio_vendas$Date)
+
+relatorio_vendas <- relatorio_vendas %>% 
+  inner_join(info_vendas, by = c("SaleID" = "Sal3ID")) %>% 
+  inner_join(info_lojas, by = c("StoreID" = "Stor3ID")) %>% 
+  inner_join(info_cidades, by = c("CityID" = "C1tyID")) %>% 
+  inner_join(info_produtos, by = c("ItemID" = "Ite3ID")) %>% 
+  inner_join(info_clientes, by = c("ClientID" = "Cli3ntID"))
+
+relatorio_vendas <- relatorio_vendas %>% 
+  mutate(ano = year(Date)) %>%
+  mutate(UnityPrice = UnityPrice * 5.31) %>% 
+  mutate(receitaVenda = Quantity * UnityPrice) %>% 
+  mutate(Height_dm = Height_dm * 10) %>% 
+  mutate(Weight_lbs = Weight_lbs * 0.453592) %>% 
+  rename(altura_cm = Height_dm,
+         peso_kg = Weight_lbs) %>% 
+  mutate(IMC = peso_kg/(altura_cm/100)^2) %>% 
+  mutate(FaixaPeso = sapply(IMC, faixa_peso))
 ```
 
 # Introdução
 
+\ \ \ \ João Sábio, proprietário da Old Town Road.Ltda, uma holding que controla diversas empresas ligadas ao comércio no faroeste, nos contratou para realizar análises estatísticas que visam compreender melhor o mercado em certa região em que ele tem o interesse de investir. Nesse relatório serão abordadas as análises de interesse do cliente: a receita média das lojas registrada nos anos de 1880 até 1889, variação Peso por Altura, idade dos clientes de Âmbar Seco a depender da loja e o top 3 produtos mais vendidos nas top 3 lojas com maior receita em
+1889.
+
 # Referencial Teórico
+
+## Frequência Relativa
+
+A frequência relativa é utilizada para a comparação entre classes de uma variável categórica com $c$ categorias, ou para comparar uma mesma categoria em diferentes estudos.
+
+A frequência relativa da categoria $j$ é dada por:
+
+$$
+f_j=\frac{n_j}{n}
+$$
+
+Com:
+
+-   $j = 1, \, ..., \, c$
+
+-   $n_j =$ número de observações da categoria $j$
+
+-   $n =$ número total de observações
+
+Geralmente, a frequência relativa é utilizada em porcentagem, dada por:
+
+$$100 \times f_j$$
+
+## Média
+
+A média é a soma das observações dividida pelo número total delas, dada pela fórmula:
+
+$$\bar{X}=\frac{\sum\limits_{i=1}^{n}X_i}{n}$$
+
+Com:
+
+-   $i = 1, \, 2, \, ..., \, n$
+
+-   $n =$ número total de observações
+
+## Mediana
+
+Sejam as $n$ observações de um conjunto de dados $X=X_{(1)},X_{(2)},\ldots, X_{(n)}$ de determinada variável ordenadas de forma crescente. A mediana do conjunto de dados $X$ é o valor que deixa metade das observações abaixo dela e metade dos dados acima.
+
+Com isso, pode-se calcular a mediana da seguinte forma:
+
+$$
+med(X) =
+    \begin{cases}
+         X_{\frac{n+1}{2}}, \textrm{para n ímpar} \\
+         \frac{X_{\frac{n}{2}}+X_{\frac{n}{2} + 1}}{2}, \textrm{para n par} \\
+    \end{cases}
+$$
+
+## Quartis
+
+Os quartis são separatrizes que dividem o conjunto de dados em quatro partes iguais. O primeiro quartil (ou inferior) delimita os 25% menores valores, o segundo representa a mediana, e o terceiro delimita os 25% maiores valores. Inicialmente deve-se calcular a posição do quartil:
+
+-   Posição do primeiro quartil $P_1$: $$P_1=\frac{n+1}{4}$$
+
+-   Posição da mediana (segundo quartil) $P_2$: $$P_2 = \frac{n+1}{2}$$
+
+-   Posição do terceiro quartil $P_3$: $$P_3=\frac{3 \times (n+1)}{4}$$
+
+Com $n$ sendo o tamanho da amostra. Dessa forma, $X_{\left( P_i \right)}$ é o valor do $i$-ésimo quartil, onde $X_{\left( j \right)}$ representa a $j$-ésima observação dos dados ordenados.
+
+Se o cálculo da posição resultar em uma fração, deve-se fazer a média entre o valor que está na posição do inteiro anterior e do seguinte ao da posição.
+
+## Variância
+
+A variância é uma medida que avalia o quanto os dados estão dispersos em relação à média, em uma escala ao quadrado da escala dos dados.
+
+### Variância Populacional
+
+Para uma população, a variância é dada por:
+
+$$\sigma^2=\frac{\sum\limits_{i=1}^{N}\left(X_i - \mu\right)^2}{N}$$
+
+Com:
+
+-   $X_i =$ $i$-ésima observação da população
+
+-   $\mu =$ média populacional
+
+-   $N =$ tamanho da população
+
+### Variância Amostral
+
+Para uma amostra, a variância é dada por:
+
+$$S^2=\frac{\sum\limits_{i=1}^{n}\left(X_i - \bar{X}\right)^2}{n-1}$$
+
+Com:
+
+-   $X_i =$ i-ésima observação da amostra
+
+-   $\bar{X} =$ média amostral
+
+-   $n =$ tamanho da amostra
+
+## Desvio Padrão
+
+O desvio padrão é a raiz quadrada da variância. Ele avalia o quanto os dados estão dispersos em relação à média.
+
+### Desvio Padrão Populacional
+
+Para uma população, o desvio padrão é dado por:
+
+$$\sigma=\sqrt{\frac{\sum\limits_{i=1}^{N}\left(X_i - \mu\right)^2}{N}}$$
+
+Com:
+
+-   $X_i =$ i-ésima observação da população
+
+-   $\mu =$ média populacional
+
+-   $N =$ tamanho da população
+
+### Desvio Padrão Amostral
+
+Para uma amostra, o desvio padrão é dado por:
+
+$$S=\sqrt{\frac{\sum\limits_{i=1}^{n}\left(X_i - \bar{X}\right)^2}{n-1}}$$
+
+Com:
+
+-   $X_i =$ i-ésima observação da amostra
+
+-   $\bar{X} =$ média amostral
+
+-   $n =$ tamanho da amostra
+
+## Coeficiente de Variação
+
+O coeficiente de variação fornece a dispersão dos dados em relação à média. Quanto menor for o seu valor, mais homogêneos serão os dados. O coeficiente de variação é considerado baixo (apontando um conjunto de dados homogêneo) quando for menor ou igual a 25%. Ele é dado pela fórmula:
+
+$$C_V=\frac{S}{\bar{X}}\times 100$$
+
+Com:
+
+-   $S =$ desvio padrão amostral
+
+-   $\bar{X} =$ média amostral
+
+## Boxplot
+
+O boxplot é uma representação gráfica na qual se pode perceber de forma mais clara como os dados estão distribuídos. A figura abaixo ilustra um exemplo de boxplot.
+
+![Exemplo de boxplot](images/box_uni.png){fig-align="center"}
+
+A porção inferior do retângulo diz respeito ao primeiro quartil, enquanto a superior indica o terceiro quartil. Já o traço no interior do retângulo representa a mediana do conjunto de dados, ou seja, o valor em que o conjunto de dados é dividido em dois subconjuntos de mesmo tamanho. A média é representada pelo losango branco e os pontos são *outliers*. Os *outliers* são valores discrepantes da série de dados, ou seja, valores que não demonstram a realidade de um conjunto de dados.
+
+## Histograma
+
+O histograma é uma representação gráfica utilizada para a visualização da distribuição dos dados e pode ser construído por valores absolutos, frequência relativa ou densidade. A figura abaixo ilustra um exemplo de histograma.
+
+![Exemplo de histograma](images/hist_uni.png){fig-align="center"}
+
+## Gráfico de Dispersão
+
+O gráfico de dispersão é uma representação gráfica utilizada para ilustrar o comportamento conjunto de duas variáveis quantitativas. A figura abaixo ilustra um exemplo de gráfico de dispersão, onde cada ponto representa uma observação do banco de dados.
+
+![Exemplo de Gráfico de Dispersão](images/disp_uni.png){fig-align="center"}
+
+## Tipos de Variáveis
+
+### Qualitativas
+
+As variáveis qualitativas são as variáveis não numéricas, que representam categorias ou características da população. Estas subdividem-se em:
+
+-   **Nominais**: quando não existe uma ordem entre as categorias da variável (exemplos: sexo, cor dos olhos, fumante ou não, etc)
+-   **Ordinais**: quando existe uma ordem entre as categorias da variável (exemplos: nível de escolaridade, mês, estágio de doença, etc)
+
+### Quantitativas
+
+As variáveis quantitativas são as variáveis numéricas, que representam características numéricas da população, ou seja, quantidades. Estas subdividem-se em:
+
+-   **Discretas**: quando os possíveis valores são enumeráveis (exemplos: número de filhos, número de cigarros fumados, etc)
+-   **Contínuas**: quando os possíveis valores são resultado de medições (exemplos: massa, altura, tempo, etc)
+
+## Coeficiente de Correlação de Pearson
+
+O coeficiente de correlação de Pearson é uma medida que verifica o grau de relação linear entre duas variáveis quantitativas. Este coeficiente varia entre os valores -1 e 1. O valor zero significa que não há relação linear entre as variáveis. Quando o valor do coeficiente $r$ é negativo, diz-se existir uma relação de grandeza inversamente proporcional entre as variáveis. Analogamente, quando $r$ é positivo, diz-se que as duas variáveis são diretamente proporcionais.
+
+O coeficiente de correlação de Pearson é normalmente representado pela letra $r$ e a sua fórmula de cálculo é:
+
+$$
+r_{Pearson} = \frac{\displaystyle \sum_{i=1}^{n} \left [ \left(x_i-\bar{x}\right) \left(y_i-\bar{y}\right) \right]}{\sqrt{\displaystyle \sum_{i=1}^{n} x_i^2 - n\bar{x}^2}  \times \sqrt{\displaystyle \sum_{i=1}^{n} y_i^2 - n\bar{y}^2}}
+$$
+
+Onde:
+
+-   $x_i =$ i-ésimo valor da variável $X$
+-   $y_i =$ i-ésimo valor da variável $Y$
+-   $\bar{x} =$ média dos valores da variável $X$
+-   $\bar{y} =$ média dos valores da variável $Y$
+
+Vale ressaltar que o coeficiente de Pearson é paramétrico e, portanto, sensível quanto à normalidade (simetria) dos dados.
+
+## Teste de Hipóteses
+
+O teste de hipóteses tem como objetivo fornecer uma metodologia para verificar se os dados das amostras possuem indicativos que comprovem, ou não, uma hipótese previamente formulada. Ele é composto por duas hipóteses:
+
+```{=latex}
+\hipoteses{hipótese a ser testada (chamada de hipótese nula)}{hipótese alternativa que será aceita caso a hipótese nula seja rejeitada}
+```
+Essa decisão é tomada por meio da construção de uma região crítica, ou seja, região de rejeição do teste.
+
+## Tipos de teste: bilateral e unilateral
+
+Para a formulação de um teste, deve-se definir as hipóteses de interesse. Em geral, a hipótese nula é composta por uma igualdade (por exemplo, $H_{0}: \theta = \theta_{0}$). Já a hipótese alternativa depende do grau de conhecimento que se tem do problema em estudo. Assim, tem-se três formas de elaborar $H_{1}$ que classificam os testes em duas categorias:
+
+-   **Teste Bilateral**:\
+    Esse é o teste mais geral, em que a hipótese alternativa consiste em verificar se existe diferença entre os parâmetros de interesse, independentemente de um ser maior ou menor que o outro. Dessa forma, tem-se:
+
+    $$ H_{1}: \theta \neq \theta_{0} $$
+
+-   **Teste Unilateral**:\
+    Dependendo das informações que o pesquisador possui a respeito do problema e os questionamentos que possui, a hipótese alternativa pode ser feita de forma a verificar se existe diferença entre os parâmetros em um dos sentidos. Ou seja:
+
+    $$ H_{1}: \theta < \theta_{0} $$ ou $$ H_{1}: \theta > \theta_{0} $$ \## Tipos de Erros Ao realizar um teste de hipóteses, existem dois erros associados: **Erro do Tipo I** e **Erro do Tipo II**.
+
+-   **Erro do Tipo I**:\
+    Esse erro é caracterizado por rejeitar a hipótese nula ($H_{0}$) quando essa é verdadeira. A probabilidade associada a esse erro é denotada por $\alpha$, também conhecido como nível de significância do teste.
+
+-   **Erro do Tipo II**:\
+    Ao não rejeitar $H_{0}$ quando, na verdade, é falsa, está sendo cometido o **Erro do Tipo II**. A probabilidade de se cometer este erro é denotada por $\beta$.
+
+## Nível de significância ($\alpha$)
+
+O nível de significância do teste é o nome dado à probabilidade de se rejeitar a hipótese nula quando essa é verdadeira; essa rejeição é chamada de **erro do tipo I**. O valor de $\alpha$ é fixado antes da extração da amostra e, usualmente, assume 5%, 1% ou 0,1%.
+
+Por exemplo, um nível de significância de $\alpha=0,05$ (5%) significa que, se for tomada uma grande quantidade de amostras, em 5% delas a hipótese nula será rejeitada quando não havia evidências para essa rejeição, isto é, a probabilidade de se tomar a decisão correta é de 95%.
+
+## Estatística do Teste
+
+A estatística do teste é o estimador que será utilizado para testar se a hipótese nula ($H_{0}$) é verdadeira ou não. Ela é escolhida por meio das teorias estatísticas.
+
+## P-valor
+
+O **P-valor**, ou nível descritivo, é uma medida utilizada para sintetizar o resultado de um teste de hipóteses. Ele também pode ser chamado de *probabilidade de significância* do teste e indica a probabilidade de se obter um resultado da estatística de teste mais extremo do que o observado na presente amostra, considerando que a hipótese nula é verdadeira. Dessa forma, rejeita-se $H_{0}$ quando $P\text{-valor} < \alpha$, porque a chance de uma nova amostra possuir valores tão extremos quanto o encontrado é baixa, ou seja, há evidências para a rejeição da hipótese nula.
+
+## Intervalo de Confiança
+
+Quando calcula-se um estimador pontual para o parâmetro, não é possível definir qual a possível magnitude do erro que se está cometendo. Com o objetivo de associar um erro à estimativa, são construídos os intervalos de confiança que se baseiam na distribuição amostral do estimador pontual.
+
+Dessa forma, considere $T$ um estimador pontual para $\theta$ e que a distribuição amostral de $T$ é conhecida. O intervalo de confiança para o parâmetro $\theta$ será dado por $t_{1}$ e $t_{2}$, tal que:
+
+$$ P(t_{1} < \theta < t_{2}) = \gamma $$
+
+A probabilidade $\gamma$ é estabelecida no início do estudo e representa o nível de confiança do intervalo. A interpretação desse resultado é que, se forem tiradas várias amostras de mesmo tamanho e forem calculados intervalos de confiança para cada uma, $100 \times \gamma \%$ dos intervalos irão conter o parâmetro $\theta$. Assim, ao calcular um intervalo, pode-se dizer que há $100 \times \gamma \%$ de confiança de que o intervalo contém o parâmetro de interesse.
+
+# Teste de Normalidade
+
+Os testes de normalidade são utilizados para verificar se uma variável aleatória segue um distribuição Normal de probabilidade ou não. Eles são muito importantes, pois impactam em qual teste deve ser utilizado em uma análise futura. Se o resultado do teste confirmar que a variável segue uma distribuição normal, procedimentos paramétricos podem e devem ser utilizados. Caso contrário, os métodos não paramétricos são mais recomendados.
+
+## Teste de Normalidade de Lilliefors
+
+Assim como o teste de Kolmogorov-Smirnov, o **teste de Lilliefors** é utilizado para verificar se um conjunto de dados $X_1, X_2, ..., X_n$ de tamanho $n$ segue determinada distribuição. A estatística de teste para este teste é dada por:
+
+$$ T_1 = sup_x |F^*(x) - S(X)| $$
+
+A diferença entre a estatística $T$ de Kolmogorov e $T_1$ de Lilliefors é que a função de distribuição acumulada $S_n(x)$ é obtida através dos dados padronizados da amostra, ou seja, $Z_1, Z_2, ..., Z_n$, com $Z_i = \displaystyle \frac{X_i - \bar{X}}{S}$. O teste acima é recomendado para amostras grandes com presença de valores discrepantes (*outliers*).
+
+O teste possui as seguintes hipóteses:
+
+```{=latex}
+\begin{center}
+\hipoteses{A variável segue o modelo proposto}{A variável segue outro modelo}
+\end{center}
+```
+Se a hipótese nula é verdadeira, espera-se que as diferenças entre $F_0(x)$ e $S_n(x)$ sejam pequenas e estejam dentro dos limites dos erros aleatórios.
+
+## Teste de Correlação de Pearson
+
+O coeficiente de correlação linear de Pearson indica a força e a direção do relacionamento linear entre duas variáveis quantitativas. É um índice adimensional com valores situados entre -1 e 1, no qual o valor -1 representa total correlação linear negativa entre as variáveis (quando o valor de uma variável cresce, o valor da outra diminui) e o valor 1 representa total correlação linear positiva entre elas (ambas crescem simultaneamente). Esse coeficiente é obtido por meio da fórmula:
+
+$$r_{Pearson} = \frac{\displaystyle \sum_{i=1}^{n} \left [ \left(x_i-\bar{x}\right) \left(y_i-\bar{y}\right) \right]}{\sqrt{\displaystyle \sum_{i=1}^{n} x_i^2 - n\bar{x}^2} \sqrt{\displaystyle \sum_{i=1}^{n} y_i^2 - n\bar{y}^2}}$$
+
+\noindent em que
+
+-   $x_i=$ i-ésimo valor da variável $X$
+
+-   $y_i=$ i-ésimo valor da variável $Y$
+
+-   $\bar{x}=$ média dos valores da variável $X$
+
+-   $\bar{y}=$ média dos valores da variável $Y$
+
+-   $r_{Pearson}=$ coeficiente de correlação linear de Pearson amostral
+
+Para o teste de correlação de Pearson, tem-se as seguintes hipóteses:
+
+\hipoteses{Não há correlação linear entre as variáveis $X$ e $Y$ $\left(\rho_{Pearson} = 0 \right)$ }{Há correlação linear entre as variáveis $X$ e $Y$ $\left(\rho_{Pearson} \neq 0 \right)$ }
+
+em que $\rho_{Pearson}$ é o parâmetro a ser testado: coeficiente de correlação linear populacional.
+
+Se X e Y tem distribuição normal, tem-se que a estatística do teste é dada por:
+
+$$t_{Pearson} = \frac{r_{Pearson} \sqrt{n-2}}{\sqrt{1-r_{Pearson}^2}} \sim t_{n-2} $$
+
+Assim, sob $H_{0}$, $t_{Pearson}$ segue uma distribuição \textit{t}-Student com ($n - 2$) graus de liberdade.
+
+# Método
+
+\ \ \ \ Neste estudo, serão utilizados dados fornecidos pela ESTAT - Consultoria Estatística. Conferir Anexo 1 com o dicionário das variáveis em estudo.
 
 # Análises
 
-# Conclusões
+\ \ \ \ O conjunto de dados consiste em 19.885 observações de compras feitas por 1990 **clientes** de 10 tipos de **produtos** em 18 **lojas** distintas nas 5 **cidades** da região de interesse.
+
+## Análise 1
+
+```{r}
+#| echo: false
+
+tabela1 <-  relatorio_vendas %>% 
+  group_by(ano, NameStore, NameProduct, NameCity) %>%
+  summarise(
+    receitaAnual = sum(receitaVenda)
+  ) #%>% View
+
+tabela2 <- tabela1 %>% 
+  group_by(NameStore) %>% 
+  summarise(
+    Média = mean(receitaAnual),
+    Mediana = median(receitaAnual),
+    DP = sd(receitaAnual),
+  ) %>% 
+  arrange(desc(Média)) #%>% View
+
+tabela3 <- relatorio_vendas %>%
+  group_by(ano) %>% 
+  summarise(
+    receitaAnual = sum(receitaVenda)/18
+  ) #%>% View
+
+tabela4 <- relatorio_vendas %>% 
+  group_by(NameProduct) %>%
+  summarise(
+    Quantidade = sum(Quantity)
+    ) %>% 
+  arrange(desc(Quantidade)) #%>% View
+
+tabela5 <- tabela1 %>% 
+  group_by(NameProduct) %>%
+  summarise(
+    Média = mean(receitaAnual),
+    Mediana = median(receitaAnual),
+    DP = sd(receitaAnual),
+  ) %>% 
+  arrange(desc(Média)) #%>% View
+
+tabela6 <- relatorio_vendas %>% 
+  group_by(NameCity) %>%
+  summarise(
+    Quantidade = sum(Quantity)
+    ) %>% 
+  arrange(desc(Quantidade)) #%>% View
+
+tabela7 <- tabela1 %>% 
+  group_by(NameCity) %>%
+  summarise(
+    Média = mean(receitaAnual),
+    Mediana = median(receitaAnual),
+    DP = sd(receitaAnual),
+  ) %>% 
+  arrange(desc(Média)) #%>% View
+
+tabela8 <- tabela1 %>% 
+  filter(ano %in% c(1880, 1889)) %>%
+  group_by(NameCity) %>%
+  summarise(
+    "Taxa de cerscimento (%)" = ((sum(receitaAnual[ano == 1889]) -sum(receitaAnual[ano == 1880]))/sum(receitaAnual[ano == 1880])) * 100
+  ) %>% arrange(desc(`Taxa de cerscimento (%)`)) #%>% View
+
+```
+
+\ \ \ \ O objetivo desta análise é compreender o comportamento das **lojas** ao longo da série temporal por meio da **receita anual** e da **receita média**. A receita anual corresponde à soma da quantidade vendida multiplicada pelo preço unitário de cada item comercializado em determinado ano, enquanto a receita média é a soma da receita anual dividido pela quantidade de lojas na região (18), ambas são variáveis **quantitativas contínuas**, por esse motivo foi utilizado gráficos de dispersão. Por outro lado, a loja é uma variável **qualitativa nominal**. Foram utilizados gráficos de dispersão para facilitar a visualização e a análise dos dados. Na Figura 1, o gráfico é apresentado em facetas e mostra a receita anual de cada loja, com o ano no eixo x e a receita total anual no eixo y. Já na Figura 2, o gráfico apresenta a receita média. A Tabela 1 apresenta a média, a mediana e o desvio-padrão da receita de cada loja em todo o período, enquanto a Tabela 2 mostra a receita média em reais ao longo dos anos de 1880 a 1889.
+
+\vspace{.2cm}
+```{r}
+#| echo: false
+#| label: fig-grafico-1
+#| fig-cap: Receita anual das lojas
+#| fig-width: 12
+#| fig-height: 8
+
+relatorio_vendas %>%
+  group_by(ano, NameStore) %>% 
+  summarise(receita = sum(receitaVenda)) %>% 
+  ggplot(aes(ano, receita)) +
+  scale_x_continuous(breaks = seq(1880, 1889, by = 2)) +
+  # geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
+  geom_point(size = 1.5, colour = "#A11D21") +
+  geom_line(colour = "#A11D21") +
+  facet_wrap(~NameStore, nrow = 3) +
+  labs(x = "Ano", y = "Receita") +
+  theme_estat()
+```
+
+\newpage
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-1
+#| tbl-cap: Resumo da receita das lojas em todo o período
+#| cap-location: top
+
+colnames(tabela2)[1] <- "Loja"
+tabela2 %>% kable(digits = 2)
+```
+
+\ \ \ \ As 18 lojas da região apresentam comportamentos diversos, sendo que a maioria registrou crescimento na receita anual ao final do período em relação ao primeiro ano da série. A loja **Saloon** destaca-se das demais, em que sua receita anual apresentou uma queda significativa durante o mesmo intervalo. As lojas que tiveram maior receita média nos 10 anos em estudo foram **Ferraria Apache**, **Loja Ouro Fino** e **Loja TendTudo**, já as que tiveram a menor receita méida foram **Banco Careca**, **Loja Riacho Prateado** e **Saloon Rastro de Poeira**.
+
+\newpage
+
+```{r}
+#| echo: false
+#| label: fig-grafico-2
+#| fig-cap: Receita média da região
+
+relatorio_vendas %>% 
+  group_by(ano) %>% 
+  summarise(receita = sum(receitaVenda)/18) %>%
+  ggplot(aes(ano, receita)) +
+  scale_x_continuous(breaks = c(1880:1889)) +
+  # geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
+  geom_point(size = 1.5, colour = "#A11D21") +
+  geom_line(colour = "#A11D21") +
+  labs(x = "Ano", y = "Receita Média") +
+  theme_estat()
+
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-2
+#| tbl-cap: Receita méida da região nos anos de 1880 a 1889
+#| cap-location: top
+
+colnames(tabela3) <- c("Ano", "Receita média (R$)")
+tabela3 %>% kable(digits = c(0, 2))
+```
+
+\ \ \ \ A receita média da região apresentou um crescimento expressivo ao longo do período analisado, com um aumento total de R\$49.610,10 desde o início da série histórica. Esses resultados indicam que a região apresenta **grande potencial** de investimento.
+
+\newpage
+
+## Análise dos produtos (Extra)
+
+\ \ \ \ O objetivo desta análise é examinar mais detalhadamente a **receita anual** e a **receita méida** por **produto** na região, bem como a **quantidade vendida**, produtos é variável **qualitativa nominal**.
+
+```{r}
+#| echo: false
+#| label: fig-grafico-3
+#| fig-cap: Receita anual por produto
+#| fig-width: 12
+#| fig-height: 8
+
+relatorio_vendas %>%
+  group_by(ano, NameProduct) %>% 
+  summarise(receita = sum(receitaVenda)) %>%
+  ggplot(aes(ano,receita)) +
+  scale_x_continuous(breaks = seq(1880, 1889, by = 2)) +
+  # geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
+  geom_point(size = 1.5, colour = "#A11D21") +
+  geom_line(colour = "#A11D21") +
+  facet_wrap(~NameProduct, nrow = 2) +
+  labs(x = "Ano", y = "Receita") +
+  theme_estat()
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-3
+#| tbl-cap: Quantidade de produtos vendidos nos anos de 1880 a 1889
+#| cap-location: top
+
+colnames(tabela4) <- c("Produto", "Quantidade")
+tabela4 %>% kable()
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-4
+#| tbl-cap: Resumo da receita dos produtos nos anos de 1880 a 1889
+#| cap-location: top
+
+colnames(tabela5)[1] <- "Produto"
+tabela5 %>% kable(digits = 2)
+```
+
+\ \ \ \ Dos 10 produtos disponíveis, o **Cavalo** apresentou a maior média de receita, mesmo sendo o menos vendido. Esse resultado se deve ao elevado preço unitário do produto, de R\$ 2.981,99. O **Chapéu de Couro** foi o item mais vendido na região, seguido pela **Espingarda** e pela **Colt .45**. É importante observar que a soma das quantidades vendidas das duas armas foi de 10.295 unidades, enquanto o total de **Munições** vendidas foi de apenas 4.862. Esse contraste pode indicar que os consumidores adquirem munições em outras regiões ou não sentem necessidade de comprá-las com frequência após a aquisição da arma. Além disso, nota-se que foram vendidas mais do que o dobro de **Selas** em relação ao número de **Cavalos**, o que pode sugerir que as **Selas** vendidas na região são de baixa qualidade ou mal cuidadas, dentre outras possibilidadaes.
+
+\newpage
+
+## Análise das cidades (Extra)
+
+\ \ \ \ Nessa análise iremos aprofundar o entendimento de cada **cidade** observando a **receita anual** e a **receita média** assim como a **taxa de crescimento econômico**, que foi calculada pela diferença das receitas nos anos de 1889 e 1880, dividido pela receita em 1880, cidade é variável **qualitativa nominal** e taxa de crescimento econômico é variável **quantitativa contínua**.
+
+```{r}
+#| echo: false
+#| label: fig-grafico-4
+#| fig-cap: Receita anual por cidade
+
+relatorio_vendas %>%
+  group_by(ano, NameCity) %>% 
+  summarise(receita = sum(receitaVenda)) %>%
+  ungroup() %>% 
+  select(ano, NameCity, receita) %>%
+  ggplot(aes(ano,receita, colour = NameCity)) +
+  scale_x_continuous(breaks = seq(1880, 1889, by = 2)) +
+  #geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
+  geom_point(size = 3, alpha = .5) +
+  geom_line(size = 1) +
+  #facet_wrap(~NameCity, nrow = 2) +
+  labs(x = "Ano", y = "Receita", colour = "Cidade") +
+  theme_estat() +
+  theme(legend.position = "right")
+
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-5
+#| tbl-cap: Resumo da receita das cidades nos anos de 1880 a 1889
+#| cap-location: top
+
+colnames(tabela7)[1] <- "Cidade"
+tabela7 %>% kable(digits = 2)
+```
+
+\newpage
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-6
+#| tbl-cap: Taxa de crescimento econômico (%) das cidades entre 1880 e 1889
+#| cap-location: top
+
+colnames(tabela8)[1] <- "Cidade"
+tabela8 %>% kable(digits = 2)
+```
+
+\ \ \ \ A cidade de **Rio Bravo** apresentou o maior crescimento em receita anual ao longo do período analisado, destacando-se também por possuir o maior número de vendas (11290) e a maior receita média (R\$2.527,90). Observa-se que **Canoa Quebrada** realizou apenas 8.031 vendas nos 10 anos em análise, mas registrou a segunda maior receita média. Toodas As cidades demonstram bom crescimento econômico e se mostram **promissoras** para investimentos futuros, porém as cidades com maior taxa de crescimento econômico foi **Rio Bravo**, **Canoa Quebrada** e **Sussuro de Pedra**.
+
+## Análise 2
+
+```{r}
+#| echo: false
+
+aux <- relatorio_vendas %>% 
+  select(ClientID, peso_kg, altura_cm, IMC, FaixaPeso) %>% 
+  distinct()
+
+p_media <- mean(aux$peso_kg)
+p_sd <- sd(aux$peso_kg)
+p_var <- var(aux$peso_kg)
+h_media <- mean(aux$altura_cm)
+h_sd <- sd(aux$altura_cm)
+h_var <- var(aux$altura_cm)
+
+np_test <- lillie.test(aux$peso_kg)
+nh_test <- lillie.test(aux$altura_cm)
+
+p_est <- np_test$statistic
+p_pv <- np_test$p.value
+h_est <- nh_test$statistic
+h_pv <- nh_test$p.value
+
+quadro1 <- aux %>% 
+  summarise(
+    Média = p_media,
+    Mediana = median(peso_kg),
+    `Desvio Padrão` = p_sd,
+    Variância = p_var,
+    Mínimo = min(peso_kg),
+    Máximo = max(peso_kg),
+    `1º Quartil` = quantile(peso_kg, 0.25),
+    `3º Quartil` = quantile(peso_kg, 0.75)
+  ) %>% t()
+  
+quadro2 <- aux %>% 
+  summarise(
+    Média = h_media,
+    Mediana = median(altura_cm),
+    `Desvio Padrão` = h_sd,
+    Variância = h_var,
+    Mínimo = min(altura_cm),
+    Máximo = max(altura_cm),
+    `1º Quartil` = quantile(altura_cm, 0.25),
+    `3º Quartil` = quantile(altura_cm, 0.75)
+  ) %>% t()
+
+cor_test <- cor.test(aux$peso_kg, aux$altura_cm, method = "pearson", conf.level = 0.95)
+cor_hat <- cor_test$estimate
+cor_IC <- cor_test$conf.int
+cor_pv <- cor_test$p.value
+cor_est <- cor_test$statistic
+
+tabela9 <- data.frame(
+  `p-valor` = c(p_pv, h_pv),
+  `Estatística D` = c(p_est, h_est),
+  `Decisão` = c("Não rejeitar H0", "Não rejeitar H0") 
+) %>%
+  rownames_to_column("Variável") %>%
+  mutate(Variável = c("Peso", "Altura"))
+
+tabela10 <- data.frame(
+  `Correlação de Pearson` = cor_hat,
+  `p-valor` = 0,
+  `Estatística t` = cor_est) %>% t()
+```
+
+\ \ \ \ O objetivo desta análise é investigar se existe relação linear entre o **peso** e a **altura** dos clientes, em que o peso foi convertido para quilogramas (multiplicando o valor em libras por 0,453592) e a altura convertido para centímetros (multiplicando o valor em decímetros por 10), ambas variáveis são **quantitativas continuas**.
+
+```{r}
+#| echo: false
+#| label: fig-grafico-6
+#| fig-cap: Disperssão entre peso e altura dos clientes
+
+aux %>% 
+  group_by(ClientID) %>% 
+  ggplot(aes(x = peso_kg, y = altura_cm)) +
+  geom_point(colour = "#A11D21", alpha = .5) +
+  # geom_jitter(width = .5, height = .5, colour = "#A11D21", alpha = .3) +
+  labs(x = "Peso (kg)", y = "altura (cm)") +
+  theme_estat()
+```
+
+\newpage
+
+Quadro 1: Principais métricas do peso dos clientes
+
+\vspace{.2cm}
+```{=latex}
+\begin{center}
+\begin{tabular} { | l |
+			S[table-format = 2.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 75,19 \\
+		Desvio Padrão & 11,92 \\
+		Variância & 142 \\
+		Mínimo & 45 \\
+		1º Quartil & 66,9 \\
+		Mediana & 75,3 \\
+		3º Quartil & 83,2 \\
+		Máximo & 119,3 \\
+	\hline
+\end{tabular}
+\end{center}
+```
+\vspace{.2cm}
+
+Quadro 2: Principais métricas da altura dos clientes
+
+\vspace{.2cm}
+```{=latex}
+\begin{center}
+\begin{tabular} { | l |
+			S[table-format = 1.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 171,48 \\
+		Desvio Padrão & 9,87 \\
+		Variância & 97,38 \\
+		Mínimo & 150 \\
+		1º Quartil & 164,8 \\
+		Mediana & 171,75 \\
+		3º Quartil & 178 \\
+		Máximo & 200 \\
+	\hline
+\end{tabular}
+\end{center}
+```
+\vspace{.2cm}
+
+\ \ \ \ Ao observar o gráfico de dispersão entre **peso** e **altura**, nota-se de imediato uma relação positiva entre as variáveis, assim como uma alta variabilidade. A medida que o peso aumenta a altura tende a aumentar e os pontos estão bem espalhados, indicando que, embora exista uma correlação positiva, o peso varia bastante mesmo entre clientes com estaturas semelhantes.
+
+\ \ \ \ Para realizar a análise, primeiro foram realizados dois testes de aderência de Lilliefors, a fim de verificar normalidade das variáveis **peso** e **altura**. As hipóteses nulas $H_0$ consideram que o peso dos clientes provém de uma população normalmente distribuída com média igual a 75,18849 e variância igual a 141,9977, e que a altura dos clientes provém de uma população normalmente distribuída com média igual a 171,4808 e variância igual a 97,37976. As hipóteses alternativas $H_1$ afirmam que os dados não seguem essas distribuições propostas. Os parâmetros de média e variância utilizados nessas distribuições correspondem às médias e variâncias amostrais da respectiva variável (ver Quadros 1 e 2).
+
+```{=latex}
+\begin{center}
+\hipoteses{Peso $\sim Normal(\mu = 75,18849; \sigma^2 = 141,9977)$}{Peso segue outra distribuição}
+\hipoteses{Altura $\sim Normal(\mu = 171,4808; \sigma^2 = 97,37976)$}{Altura segue outra distribuição}
+\end{center}
+```
+
+\ \ \ \ Sob $H_0$, os p-valores encontrados foram 0,24463150 e 0,3278868, respectivamente, ao nível de significância de 5% não há evidência suficiente para rejeitar as hipóteses nulas. Sugerindo que ambos os dados seguem uma distribuição aproximadamente normal.
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-7
+#| tbl-cap: Resultados dos testes
+
+colnames(tabela9)[c(2, 3)] <- c("p-valor", "Estatística D")
+tabela9 %>% kable()
+```
+
+\ \ \ \ Além disso, a suposição de normalidade também foram avaliadas gráficamente por meio da comparação da densidade amostral com a densidade teórica, e a análise dos quantis observados com os quantis teóricos da distribuição normal.
+
+```{r}
+#| echo: false
+#| label: fig-grafico-7
+#| fig-cap: Distribuição empírica e normal teórica do peso
+
+aux %>%
+  ggplot(aes(x = peso_kg)) +
+  geom_histogram(aes( y = ..density.., fill = "Distribuição empírica"), binwidth = 5, colour = "white") +
+  stat_function(
+    fun = dnorm,
+    args = list(mean = p_media,
+                sd = p_sd),
+    aes(colour = "Distribuição teórica"),
+    size = 1.2, linetype = "dashed") +
+  labs(x = "Peso (kg)", y = "Densidade", fill = NULL, colour = NULL) +
+  theme_estat() +
+  scale_colour_manual(values = c("Distribuição teórica" = "#003366"))
+```
+
+```{r}
+#| echo: false
+#| label: fig-grafico-8
+#| fig-cap: Distribuição empírica e normal teórica da altura
+
+aux %>% 
+  ggplot(aes(x = altura_cm)) +
+  geom_histogram(aes( y = ..density.., fill = "Distribuição empírica"), binwidth = 5, colour = "white") +
+  stat_function(
+    fun = dnorm,
+    args = list(mean = h_media,
+                sd = h_sd),
+    aes(colour = "Distribuição teórica"),
+    size = 1.2, linetype = "dashed") +
+  labs(x = "Altura (cm)", y = "Densidade", fill = NULL, colour = NULL) +
+  theme_estat() +
+  scale_colour_manual(values = c("Distribuição teórica" = "#003366"))
+```
+
+```{r}
+#| echo: false
+#| label: fig-grafico-9
+#| fig-cap: Q-Q plot do peso
+
+qqnorm(aux$peso_kg, ylab = "Quantis amostrais",
+       xlab = "Quantis teóricos",
+       main = NULL)
+qqline(aux$peso_kg, col = "red", lwd = 2)
+```
+
+```{r}
+#| echo: false
+#| label: fig-grafico-10
+#| fig-cap: Q-Q plot da altura
+
+qqnorm(aux$altura_cm, ylab = "Quantis amostrai",
+       xlab = "Quantis teóricos",
+       main = NULL)
+qqline(aux$altura_cm, col = "red", lwd = 2)
+```
+
+\ \ \ \ Em seguida, após a verificação da normalidade das variáveis, foi realizado o teste de correlação de Pearson sob as seguintes hipóteses.
+
+```{=latex}
+\begin{center}
+\hipoteses{$\rho = 0$}{$\rho \neq 0$}
+\end{center}
+```
+
+\ \ \ \ Sob $H_0$, foi obtido um p-valor $< 2,2 \times 10^{-16}$, ao nível de significância de 5% há evidencia estatística suficiente para rejeitar a hipótese nula, indicando que há correlação linear entre as variáveis. O estimador do coeficiente de correlação, o p-valor, a estatística do teste e o intervalo de confiança a 95% estão na seguinte tabela.
+
+\newpage
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-8
+#| tbl-cap: Resultados da correlação de Pearson entre peso e altura
+
+colnames(tabela10) <- ""
+rownames(tabela10) <- c("$\\hat{\\rho}$", "p-valor", "Estatística t")
+tabela10 %>% kable(escape = FALSE)
+```
+
+
+```{=latex}
+\begin{center}
+    \begin{tabular}{|c I|}
+        \toprule
+        \textbf{Parâmetro} & \textbf{Intervalo de Confiança (95\%)} \\
+        \midrule
+        $\rho$ & \interval{0.6737991}{0.7190173} \\ % substitua o "a" pelo limite inferior e o "b" pelo limite superior
+        \bottomrule
+    \end{tabular}
+\end{center}
+```
+
+\ \ \ \ O estimador da correlação de Pearson ($0,5 < \hat{\rho} < 0,7$) indica que na população de clientes há uma relação linear positiva moderada, quase alta, entre o **peso** e a **altura**. Isso é, à medida que a altura dos clientes aumenta, o peso também tende a aumentar. O p-valor muito baixo fornece evidência estatistica que a correlação linear é não nula, sugerindo que que a relação observada dificilmente ocorreu ao acaso. O intervalo de confiança indica que com 95% de confiança no procedimento de estimação, o valor verdadeiro da correlação populacional estaria dentro do intervalo $[0,6737991; 0,7190173]$. Assim, podemos conlcuir que em geral, **clientes mais altos pesam mais**.
+
+## Análise do IMC (Extra)
+
+```{r}
+#| echo: false
+
+quadro3 <- aux %>%
+  summarise(
+    Média = mean(IMC),
+    Mediana = median(IMC),
+    `Desvio Padrão` = sd(IMC),
+    Variância = var(IMC),
+    Mínimo = min(IMC),
+    Máximo = max(IMC),
+    `1º Quartil` = quantile(IMC, 0.25),
+    `3º Quartil` = quantile(IMC, 0.75)
+  ) %>% t()
+
+tabela13 <- aux %>%
+  group_by(FaixaPeso) %>%
+  summarise(
+    frequencia = n(),
+    "percentual (%)" = (n()/nrow(aux)) * 100
+    ) %>% 
+  arrange(desc(frequencia))
+```
+
+\ \ \ \ O objetivo desta análise é examinar em maior detalhe o **Índice de Massa Corporal (IMC)** e a **Faixa de Peso** dos clientes, obtido a partir da relação entre o peso em quilogramas e o quadrado da altura em metros (conferir Anexo 3 e 4), IMC é variavél **quantitativa contínua** e Faixa de Peso é **qualitativa ordinal**.
+
+```{r}
+#| echo: false
+#| label: fig-grafico-11
+#| fig-cap: Distribuição do IMC dos clientes
+
+aux %>%
+  ggplot(aes(x = IMC)) +
+  geom_histogram(binwidth = 1, fill = "#A11D21", colour = "white") +
+  labs(x = "IMC", y = "Frequência", title = "Distribuição do IMC dos clientes") +
+  theme_estat()
+```
+
+\newpage
+
+Quadro 3: Principais métricas do IMC dos clientes
+
+\vspace{.2cm}
+```{=latex}
+\begin{center}
+\begin{tabular} { | l |
+			S[table-format = 1.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Valor} \\
+		\hline
+		Média & 25,5 \\
+		Desvio Padrão & 2,96 \\
+		Variância & 8,75 \\
+		Mínimo & 16,15 \\
+		1º Quartil & 23,51 \\
+		Mediana & 25,51 \\
+		3º Quartil & 27,39 \\
+		Máximo & 34,99 \\
+	\hline
+	\end{tabular}
+\end{center}
+```
+\vspace{.2cm}
+
+```{r}
+#| echo: false
+#| label: fig-grafico-12
+#| fig-cap: Distribuição das faixas de peso dos clientes
+
+
+aux %>%
+  ggplot(aes(x = FaixaPeso)) +
+  geom_bar(fill = "#A11D21", colour = "white") +
+  labs(x = "Faixa de Peso", y = "Frequência", title = "Distribuição das faixas de peso dos clientes") +
+  theme_estat()
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-9
+#| tbl-cap: Frequência e percentual dos clientes por faixa de peso
+
+colnames(tabela13)[1] <- "Faixa de Peso"
+tabela13 %>% kable(digits = 2)
+```
+
+\ \ \ \ A mediana do **IMC** foi de 25,51, indicando que pelo menos metade da população da região encontra-se na faixa de **sobrepeso**. Observou-se também um número reduzido de casos de **obesidade** (165) e de **abaixo do peso** (12), correspondendo a aproximadamente 8,29% e 0,60% da amostra de clientes, respectivamente. 
+
+## Análise 3
+
+```{r}
+#| echo: false
+
+ambar_seco <- relatorio_vendas %>%
+  filter(NameCity == "Âmbar Seco")
+
+tabela11 <- ambar_seco %>%
+  group_by(NameStore) %>%
+  summarise(
+    Média = mean(Age),
+    Mediana = median(Age),
+    DP = sd(Age),
+    DIQ = IQR(Age)
+  ) %>%
+  arrange(desc(Média)) #%>% View
+```
+
+\ \ \ \ Para esta análise, o objetivo é examinar a distribuição da **idade** dos **clientes** por **lojas** na cidade de **Âmbar Seco**, em que idade é variável **quantitativa discreta** e clientes é variável **qualitativa nominal**.
+
+```{r}
+#| echo: false
+#| label: fig-grafico-13
+#| fig-cap: Boxplot da idade dos clientes em Âmbar Seco
+
+ambar_seco %>% 
+  group_by(NameStore, Age) %>%
+  ggplot(aes(NameStore, Age)) +
+  geom_boxplot(fill = "#A11D21") +
+  labs(x = "Loja", y = "Idade") +
+  theme_estat()
+```
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-10
+#| tbl-cap: Resumo da idade dos clientes em Âmbar Seco
+
+colnames(tabela11)[1] <- "Loja"
+tabela11 %>% kable(digits = 2)
+```
+
+\ \ \ \ Da Figura 10, e da disntância interquantílica na Tabela 11, podemos observar que as lojas **Vendinha Rápida** e **Banco Careca** apresentam uma distribuição de idades de clientes mais concentrada. Isso pode ser visto pelo menor tamanho das caixas no boxplot, e pelos menores valores de DIQ. Enquanto as lojas **Saloon** e **Ferraria Seca** possuem maior variação na idade dos clientes. Possuem caixas maiores e maiores valores de DIQ. A loja **Vendinha Rápida** se destaca por apresentar a maior média e mediana de idade, indicando que seus clientes tendem a ser mais velhos em comparação às demais lojas na cidade de Âmbar Seco. Por outro lado, a **Ferraria Seca** apresentou menor média e mediana, sugerindo um público mais jovens, no entando, o maior desvio padrão e maior disntância interquantílica, indicam que o perfil étario dos clientes é mais vasto e heterogênio.
+
+## Análise 4
+
+```{r}
+#| echo: false
+
+
+tabela12 <- relatorio_vendas %>%
+  group_by(NameStore) %>%
+  summarize(receitaLoja = sum(receitaVenda)) %>%
+  arrange(desc(receitaLoja))
+
+top3_lojas <- tabela12 %>%
+  slice(1:3) %>%
+  pull(NameStore)
+
+aux2 <- relatorio_vendas %>% 
+  select(NameStore, NameProduct, Quantity,ano, receitaVenda) %>%
+  group_by(NameStore) %>% 
+  mutate(receitaLoja = sum(receitaVenda)) %>% 
+  distinct() %>%
+  filter(ano == 1889, NameStore %in% top3_lojas)
+
+tabela13 <- aux2 %>% 
+  group_by(NameProduct) %>%
+  summarize(quantidadeVendida = sum(Quantity)) %>%
+  arrange(desc(quantidadeVendida))
+
+top3_produtos <- tabela13 %>%
+  slice(1:5) %>%
+  pull(NameProduct)
+
+tabela14 <- aux2 %>%
+  filter(NameProduct %in% top3_produtos) %>%
+  group_by(NameStore, NameProduct) %>%
+  summarise(
+    quantidadeVendida = sum(Quantity)
+  ) %>%
+  arrange(NameStore, desc(quantidadeVendida))
+```
+
+\ \ \ \ Por fim, o objetivo desta análise é identificar os três **produtos mais vendidos** nas três **lojas com maior receita** no ano de 1889.
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-11
+#| tbl-cap: Lojas com maior receita em 1889
+
+colnames(tabela12)[c(1, 2)] <- c("Loja", "Receita")
+tabela12 %>% slice(1:3) %>% kable()
+```
+
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-12
+#| tbl-cap: Produtos mais vendidos nas lojas com maior receita em 1889
+
+colnames(tabela13) <- c("Produto", "Quantidade Vendida")
+tabela13 %>% kable()
+```
+
+\newpage
+
+```{r}
+#| echo: false
+#| results: asis
+#| label: tbl-tabela-13
+#| tbl-cap: Produtos mais vendidos separado por lojas
+
+colnames(tabela14)[c(1, 2)] <- c("Loja", "Produto", "Quantidade Vendida")
+tabela14 %>% kable() %>% collapse_rows(columns = 1)
+```
+
+\ \ \ \ As lojas com maior receita em 1889 foram **Ferraria Apache**, **Loja Ouro Fino** e **Loja TendTudo**. O produtos mais vendido nessas lojas foi o **Chapéu de Couro**, que contabilizou 32 vendas. Empatados para segundo lugar foram as **Botas de Couro**, a **Espingarda**, a **Sela** e o **Whisky**, com 30 vendas. O **Chapéu de Couro** foi o produto mais popular (ou empatou com o produto mais popular) nas três lojas com maior receita no ano de 1889. Esses resultados sugerem que os clientes têm preferência pelo chapeu, porém é importante notar que a diferença da quantidade de itens vendidos é baixa, variando apenas por uma ou duas unidades entre o item mais vendido e o segundo mais vendido (ver Tabelas 13 e 14).
+
+# Conclusão
+
+\ \ \ \ A região mostrou-se muito promissora para investimentos, com crescimento expressivo na receita média ao longo do período analisado. A análise dos produtos revelou que itens como o **Cavalo** e o **Chapéu de Couro** tiveram destaque em termos de receita e quantidade vendida, respectivamente. As cidades da região também apresentaram crescimento econômico significativo, com **Rio Bravo** liderando nesse aspecto. Também foi verificado que o peso e a altura dos clientes está positivamente correlacionada. As lojas de **Âmbar Seco** possuem lojas com maior concentração de idade, e lojas mais heterogêneas quanto a faixa etária. E por fim, podemos observar que no ultimo ano dá série historica em análise, o **Chapeu de Coro** foi o item mais vendido das lojas que tiverem maior receita no ano, mesmo que apenas por duas unidades.
+
+# Anexo
+
+1.  Dicionário das variáveis do banco de dados
+
+-   ClienteID: Chave do cliente
+-   Name: O nome do cliente
+-   Age: A idade do cliente em anos
+-   Sex: Sexo do Cliente
+-   Height_dm: A altura do cliente em decímetros
+-   Weight_lbs: O peso do cliente, em libras
+-   Anual_Income_usd: Renda do cliente anualmente em dólares
+-   CityID: Chave da cidade
+-   NameCity: Nome da cidade
+-   EmployeeID: Chave do funcionário
+-   EmployeeName: Nome do funcionário
+-   StoreID: Chave da loja
+-   StoreName: Nome da loja
+-   CityID: Chave da cidade
+-   ItemID: Chave do produto
+-   NameProduct: Nome do produto
+-   UnityPrice: Preço unitário do produto em dólores
+-   SaleID: Chave da venda
+-   ItemID: Chave do produto
+-   SaleID: Chave da venda
+-   Date: A data da ocorrência da venda (YYYY-MM-DD)
+-   StoreID: Chave da loja
+-   ClientID: Chave do cliente
+-   Quantity: Quantidade comprada deste produto
+
+2. Cálculo da taxa de crescimento econômico
+
+$$
+\text{Taxa de crescimento econômico} = \frac{Receita_{\ final} - Receita_{\ inicial}}{Receita_{\ inicial}} \times 100
+$$
+
+3.  Cálculo do Índice de Massa Corporal (IMC)
+
+$$
+IMC = \frac{peso(kg)}{altura(m)^2}
+$$
+
+4.  Classificação do IMC segundo a Organização Mundial da Saúde (OMS)
+
+- Abaixo do peso: IMC < 18,5
+- Peso normal: 18,5 ≤ IMC < 24,9
+- Sobrepeso: 25 ≤ IMC < 29,9
+- Obesidade: IMC ≥ 30
+
