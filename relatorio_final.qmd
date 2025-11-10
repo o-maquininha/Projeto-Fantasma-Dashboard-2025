@@ -614,7 +614,7 @@ tabela10 %>% kable(escape = FALSE)
 \end{center}
 ```
 
-\ \ \ \ O estimador da correlação de Pearson ($0,5 < \hat{\rho} < 0,7$) indica que na população de clientes há uma relação linear positiva moderada, quase alta, entre o **peso** e a **altura**. Isso é, à medida que a altura dos clientes aumenta, o peso também tende a aumentar. O p-valor muito baixo fornece evidência estatística que a correlação linear é não nula, sugerindo que que a relação observada dificilmente ocorreu ao acaso. O intervalo de confiança indica que com 95% de confiança no procedimento de estimação, o valor verdadeiro da correlação populacional estaria dentro do intervalo $[0,6737991; 0,7190173]$. Assim, podemos conlcuir que em geral, **clientes mais altos pesam mais**.
+\ \ \ \ O estimador da correlação de Pearson ($0,5 < \hat{\rho} < 0,7$) indica que na população de clientes há uma relação linear positiva moderada, quase alta, entre o **peso** e a **altura**. Isso é, à medida que a altura dos clientes aumenta, o peso também tende a aumentar. O p-valor muito baixo fornece evidência estatística que a correlação linear é não nula, sugerindo que que a relação observada dificilmente ocorreu ao acaso. O intervalo de confiança indica que com 95% de confiança no procedimento de estimação, o valor verdadeiro da correlação populacional estaria dentro do intervalo $[0,6737991; 0,7190173]$. Assim, podemos conlcuir que, em geral, **clientes mais altos pesam mais**.
 
 ## Idade dos clientes de Âmbar Seco a depender da loja
 
@@ -728,35 +728,38 @@ tabela14 <- aux2 %>%
   slice(c(1:3, 11:13, 21:23))
 
 classes_of <- aux2 %>%
-  filter(NameStore == "Loja Ouro Fino", NameProduct %in% top3_produtos_tt) %>% 
-  count(NameProduct) %>%
+  filter(NameStore == "Loja Ouro Fino", NameProduct %in% top3_produtos_of) %>% 
+  group_by(NameProduct) %>%
+  summarise(n = sum(Quantity)) %>%  # soma a quantidade vendida
   mutate(
-    freq = n %>% percent(),
-  ) %>%
-  mutate(
-    freq = gsub("\\.", ",", freq) %>% paste("%", sep = ""),
+    freq = n / sum(n),               # calcula proporção
+    freq = freq * 100,               # transforma em porcentagem
+    freq = round(freq, 2),           # arredonda
+    freq = gsub("\\.", ",", freq) %>% paste0("%"), 
     label = str_c(n, " (", freq, ")") %>% str_squish()
   )
 
 classes_tt <- aux2 %>%
-  filter(NameStore == "Loja TendTudo", NameProduct %in% top3_produtos_tt) %>% 
-  count(NameProduct) %>%
+  filter(NameStore == "Loja TendTudo", NameProduct %in% top3_produtos_of) %>% 
+  group_by(NameProduct) %>%
+  summarise(n = sum(Quantity)) %>%  # soma a quantidade vendida
   mutate(
-    freq = n %>% percent(),
-  ) %>%
-  mutate(
-    freq = gsub("\\.", ",", freq) %>% paste("%", sep = ""),
+    freq = n / sum(n),               # calcula proporção
+    freq = freq * 100,               # transforma em porcentagem
+    freq = round(freq, 2),           # arredonda
+    freq = gsub("\\.", ",", freq) %>% paste0("%"), 
     label = str_c(n, " (", freq, ")") %>% str_squish()
   )
 
 classes_fa <- aux2 %>%
-  filter(NameStore == "Ferraria Apache", NameProduct %in% top3_produtos_tt) %>% 
-  count(NameProduct) %>%
+  filter(NameStore == "Ferraria Apache", NameProduct %in% top3_produtos_of) %>% 
+  group_by(NameProduct) %>%
+  summarise(n = sum(Quantity)) %>%  # soma a quantidade vendida
   mutate(
-    freq = n %>% percent(),
-  ) %>%
-  mutate(
-    freq = gsub("\\.", ",", freq) %>% paste("%", sep = ""),
+    freq = n / sum(n),               # calcula proporção
+    freq = freq * 100,               # transforma em porcentagem
+    freq = round(freq, 2),           # arredonda
+    freq = gsub("\\.", ",", freq) %>% paste0("%"), 
     label = str_c(n, " (", freq, ")") %>% str_squish()
   )
 ```
@@ -777,7 +780,7 @@ tabela12 %>% kable(digits = c(0, 2))
 #| echo: false
 #| results: asis
 #| label: tbl-tabela-5
-#| tbl-cap: Produtos mais vendidos nas top 3 lojas com maior receita
+#| tbl-cap: Produtos mais vendidos nas top 3 lojas com maior receita em 1889
 
 colnames(tabela13) <- c("Produto", "Quantidade Vendida", "Receita Gerada (R$)")
 tabela13 %>% kable(digits = c(0, 0, 2))
@@ -802,17 +805,16 @@ tabela14 %>% kable(digits = c(0, 0, 0, 2)) %>% collapse_rows(columns = 1)
 
 ggplot(classes_of) +
   aes(
-    x = fct_reorder(NameProduct, n, .desc = T),
+    x = fct_reorder(NameProduct, n, .desc = TRUE),
     y = n,
     label = label
   ) +
   geom_bar(stat = "identity", fill = "#A11D21", width = 0.7) +
   geom_text(
-    position = position_dodge(width = .9),
-    vjust = -0.5, # hjust = .5,
+    vjust = -0.5,
     size = 3
   ) +
-  labs(x = "Produto", y = "Frequência") +
+  labs(x = "Produto", y = "Quantidade vendida") +
   theme_estat()
 ```
 
