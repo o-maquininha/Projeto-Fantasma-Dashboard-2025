@@ -5,7 +5,8 @@ output-file: "Entrega 1"
 
 ```{r setup}
 #| include: false
-source("rdocs/entrega_1.R")
+
+source("rdocs/source/packages.R")
 knitr::opts_chunk$set(echo = TRUE, cache=T, message=F, warning=F, error=F)
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load("readxl", "tidyverse", "knitr", "kableExtra")
@@ -13,8 +14,6 @@ options(scipen=0)
 ```
 
 ```{r echo=FALSE}
-source("rdocs/source/packages.R")
-
 faixa_peso <- function(imc){
   if(imc < 18.5){
     return("Abaixo do peso")
@@ -58,8 +57,9 @@ relatorio_vendas <- relatorio_vendas %>%
 
 # Introdução
 
-\ \ \ \ João Sábio, proprietário da Old Town Road.Ltda, uma holding que controla diversas empresas ligadas ao comércio no faroeste, nos contratou para realizar análises estatísticas que visam compreender melhor o mercado em certa região em que ele tem o interesse de investir. Nesse relatório serão abordadas as análises de interesse do cliente: a receita média das lojas registrada nos anos de 1880 até 1889, variação Peso por Altura, idade dos clientes de Âmbar Seco a depender da loja e o top 3 produtos mais vendidos nas top 3 lojas com maior receita em
-1889.
+\ \ \ \ O objetivo deste relatório é apresentar uma análise dos dados, visando compreender o comportamento das vendas e dos clientes da região. O escopo das análises foi a **receita média** das lojas, a variação do **peso** por **altura**, a idade dos clientes de **Âmbar Seco** e os três **produtos mais vendidos** nas lojas com maior receita. As técnicas empregadas incluíram análises exploratórias, medidas descritivas, gráficos de dispersão e boxplots, testes de normalidade, correlação de Pearson e intervalos de confiança.
+
+\ \ \ \ Os dados foram fornecidos pela ESTAT – Consultoria Estatística. O conjunto de dados é composto por 19.885 observações de compras realizadas por 1.990 clientes, envolvendo 10 tipos de produtos comercializados em 18 lojas distribuídas entre 5 cidades da região de interesse. Para mais informações sobre as variáveis, consulte o **Anexo 1**. A análise dos dados foi realizada na versão 4.5.0 do R, mais informações sobre os pacotes e ambiente utilizados estão no **Anexo 2**.
 
 # Referencial Teórico
 
@@ -309,23 +309,6 @@ $$ P(t_{1} < \theta < t_{2}) = \gamma $$
 
 A probabilidade $\gamma$ é estabelecida no início do estudo e representa o nível de confiança do intervalo. A interpretação desse resultado é que, se forem tiradas várias amostras de mesmo tamanho e forem calculados intervalos de confiança para cada uma, $100 \times \gamma \%$ dos intervalos irão conter o parâmetro $\theta$. Assim, ao calcular um intervalo, pode-se dizer que há $100 \times \gamma \%$ de confiança de que o intervalo contém o parâmetro de interesse.
 
-## Teste de Normalidade de Lilliefors
-
-Assim como o teste de Kolmogorov-Smirnov, o **teste de Lilliefors** é utilizado para verificar se um conjunto de dados $X_1, X_2, ..., X_n$ de tamanho $n$ segue determinada distribuição. A estatística de teste para este teste é dada por:
-
-$$ T_1 = sup_x |F^*(x) - S(X)| $$
-
-A diferença entre a estatística $T$ de Kolmogorov e $T_1$ de Lilliefors é que a função de distribuição acumulada $S_n(x)$ é obtida através dos dados padronizados da amostra, ou seja, $Z_1, Z_2, ..., Z_n$, com $Z_i = \displaystyle \frac{X_i - \bar{X}}{S}$. O teste acima é recomendado para amostras grandes com presença de valores discrepantes (*outliers*).
-
-O teste possui as seguintes hipóteses:
-
-```{=latex}
-\begin{center}
-\hipoteses{A variável segue o modelo proposto}{A variável segue outro modelo}
-\end{center}
-```
-Se a hipótese nula é verdadeira, espera-se que as diferenças entre $F_0(x)$ e $S_n(x)$ sejam pequenas e estejam dentro dos limites dos erros aleatórios.
-
 ## Teste de Correlação de Pearson
 
 O coeficiente de correlação linear de Pearson indica a força e a direção do relacionamento linear entre duas variáveis quantitativas. É um índice adimensional com valores situados entre -1 e 1, no qual o valor -1 representa total correlação linear negativa entre as variáveis (quando o valor de uma variável cresce, o valor da outra diminui) e o valor 1 representa total correlação linear positiva entre elas (ambas crescem simultaneamente). Esse coeficiente é obtido por meio da fórmula:
@@ -356,15 +339,9 @@ $$t_{Pearson} = \frac{r_{Pearson} \sqrt{n-2}}{\sqrt{1-r_{Pearson}^2}} \sim t_{n-
 
 Assim, sob $H_{0}$, $t_{Pearson}$ segue uma distribuição \textit{t}-Student com ($n - 2$) graus de liberdade.
 
-# Método
-
-\ \ \ \ Neste estudo, serão utilizados dados fornecidos pela ESTAT - Consultoria Estatística. Conferir Anexo 1 com o dicionário das variáveis em estudo.
-
 # Análises
 
-\ \ \ \ O conjunto de dados consiste em 19.885 observações de compras feitas por 1990 **clientes** de 10 tipos de **produtos** em 18 **lojas** distintas nas 5 **cidades** da região de interesse.
-
-## Análise 1
+## A receita média das lojas registrada nos anos de 1880 até 1889
 
 ```{r}
 #| echo: false
@@ -417,8 +394,10 @@ tabela7 <- tabela1 %>%
   group_by(NameCity) %>%
   summarise(
     Média = mean(receitaAnual),
-    Mediana = median(receitaAnual),
     DP = sd(receitaAnual),
+    Mínimo = min(receitaAnual),
+    Mediana = median(receitaAnual),
+    Máximo = max(receitaAnual)
   ) %>% 
   arrange(desc(Média)) #%>% View
 
@@ -431,49 +410,11 @@ tabela8 <- tabela1 %>%
 
 ```
 
-\ \ \ \ O objetivo desta análise é compreender o comportamento das **lojas** ao longo da série temporal por meio da **receita anual** e da **receita média**. A receita anual corresponde à soma da quantidade vendida multiplicada pelo preço unitário de cada item comercializado em determinado ano, enquanto a receita média é a soma da receita anual dividido pela quantidade de lojas na região (18). Ambas são variáveis **quantitativas contínuas**, por esse motivo foi utilizado gráficos de dispersão. Por outro lado, a loja é uma variável **qualitativa nominal**. Foram utilizados gráficos de dispersão para facilitar a visualização e a análise dos dados. Na Figura 1, o gráfico é apresentado em facetas e mostra a receita anual de cada loja, com o ano no eixo x e a receita total anual no eixo y. Já na Figura 2, o gráfico apresenta a receita média. A Tabela 1 apresenta a média, a mediana e o desvio-padrão da receita de cada loja em todo o período, enquanto a Tabela 2 mostra a receita média em reais ao longo dos anos de 1880 a 1889.
-
-\vspace{.2cm}
-```{r}
-#| echo: false
-#| label: fig-grafico-1
-#| fig-cap: Receita anual das lojas
-#| fig-width: 12
-#| fig-height: 8
-
-relatorio_vendas %>%
-  group_by(ano, NameStore) %>% 
-  summarise(receita = sum(receitaVenda)) %>% 
-  ggplot(aes(ano, receita)) +
-  scale_x_continuous(breaks = seq(1880, 1889, by = 2)) +
-  # geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
-  geom_point(size = 1.5, colour = "#A11D21") +
-  geom_line(colour = "#A11D21") +
-  facet_wrap(~NameStore, nrow = 3) +
-  labs(x = "Ano", y = "Receita") +
-  theme_estat()
-```
-
-\newpage
+\ \ \ \ O objetivo desta análise é compreender o comportamento da região ao longo da série temporal por meio da **receita média**. Essa variável foi calculada pela soma da receita anual da região dividida pelo número de lojas (18). Receita média é uma variável **quantitativa contínua**, por esse motivo, para facilitar a interpretação dos resultados, foram utilizados gráficos de dispersão e tabelas. A Figura 4 apresenta a evolução da receita média ao longo dos anos, com o tempo no eixo x e a receita média no eixo y, enquanto a Tabela 1 exibe os valores correspondentes (em reais) no período de 1880 a 1889.
 
 ```{r}
 #| echo: false
-#| results: asis
-#| label: tbl-tabela-1
-#| tbl-cap: Resumo da receita das lojas em todo o período
-#| cap-location: top
-
-colnames(tabela2)[1] <- "Loja"
-tabela2 %>% kable(digits = 2)
-```
-
-\ \ \ \ As 18 lojas da região apresentam comportamentos diversos, sendo que a maioria registrou crescimento na receita anual ao final do período em relação ao primeiro ano da série. A loja **Saloon** destaca-se das demais, em que sua receita anual apresentou uma queda significativa durante o mesmo intervalo. As lojas que tiveram maior receita média nos 10 anos em estudo foram **Ferraria Apache**, **Loja Ouro Fino** e **Loja TendTudo**, já as que tiveram a menor receita méida foram **Banco Careca**, **Loja Riacho Prateado** e **Saloon Rastro de Poeira**.
-
-\newpage
-
-```{r}
-#| echo: false
-#| label: fig-grafico-2
+#| label: fig-grafico-4
 #| fig-cap: Receita média da região
 
 relatorio_vendas %>% 
@@ -489,10 +430,12 @@ relatorio_vendas %>%
 
 ```
 
+\newpage
+
 ```{r}
 #| echo: false
 #| results: asis
-#| label: tbl-tabela-2
+#| label: tbl-tabela-1
 #| tbl-cap: Receita méida da região nos anos de 1880 a 1889
 #| cap-location: top
 
@@ -500,113 +443,9 @@ colnames(tabela3) <- c("Ano", "Receita média (R$)")
 tabela3 %>% kable(digits = c(0, 2))
 ```
 
-\ \ \ \ A receita média da região apresentou um crescimento expressivo ao longo do período analisado, com um aumento total de R\$49.610,10 desde o início da série histórica. Esses resultados indicam que a região apresenta **grande potencial** de investimento.
+\ \ \ \ A receita média da região apresentou um crescimento expressivo ao longo do período analisado, com um aumento total de R\$49.610,10 desde o início da série histórica. É importante destacar que, em 1888, ocorreu a primeira redução na receita média da região durante todo o período analisado, entretanto, no ano seguinte (1889), observou-se um aumento explosivo na receita média. Esses resultados indicam que a região apresenta **grande potencial** de investimento.
 
-\newpage
-
-## Análise dos produtos (Extra)
-
-\ \ \ \ O objetivo desta análise é examinar mais detalhadamente a **receita anual** e a **receita méida** por **produto** na região, bem como a **quantidade vendida**. Produtos é variável **qualitativa nominal**.
-
-```{r}
-#| echo: false
-#| label: fig-grafico-3
-#| fig-cap: Receita anual por produto
-#| fig-width: 12
-#| fig-height: 8
-
-relatorio_vendas %>%
-  group_by(ano, NameProduct) %>% 
-  summarise(receita = sum(receitaVenda)) %>%
-  ggplot(aes(ano,receita)) +
-  scale_x_continuous(breaks = seq(1880, 1889, by = 2)) +
-  # geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
-  geom_point(size = 1.5, colour = "#A11D21") +
-  geom_line(colour = "#A11D21") +
-  facet_wrap(~NameProduct, nrow = 2) +
-  labs(x = "Ano", y = "Receita") +
-  theme_estat()
-```
-
-```{r}
-#| echo: false
-#| results: asis
-#| label: tbl-tabela-3
-#| tbl-cap: Quantidade de produtos vendidos nos anos de 1880 a 1889
-#| cap-location: top
-
-colnames(tabela4) <- c("Produto", "Quantidade")
-tabela4 %>% kable()
-```
-
-```{r}
-#| echo: false
-#| results: asis
-#| label: tbl-tabela-4
-#| tbl-cap: Resumo da receita dos produtos nos anos de 1880 a 1889
-#| cap-location: top
-
-colnames(tabela5)[1] <- "Produto"
-tabela5 %>% kable(digits = 2)
-```
-
-\ \ \ \ Dos 10 produtos disponíveis, o **Cavalo** apresentou a maior média de receita, mesmo sendo o menos vendido. Esse resultado se deve ao elevado preço unitário do produto, de R\$ 2.981,99. O **Chapéu de Couro** foi o item mais vendido na região, seguido pela **Espingarda** e pela **Colt .45**. É importante observar que a soma das quantidades vendidas das duas armas foi de 10.295 unidades, enquanto o total de **Munições** vendidas foi de apenas 4.862. Esse contraste pode indicar que os consumidores adquirem munições em outras regiões ou não sentem necessidade de comprá-las com frequência após a aquisição da arma. Além disso, nota-se que foram vendidas mais do que o dobro de **Selas** em relação ao número de **Cavalos**, o que pode sugerir que as **Selas** vendidas na região são de baixa qualidade ou mal cuidadas, dentre outras possibilidadaes.
-
-\newpage
-
-## Análise das cidades (Extra)
-
-\ \ \ \ Nessa análise iremos aprofundar o entendimento de cada **cidade** observando a **receita anual** e a **receita média** assim como a **taxa de crescimento econômico**, que foi calculada pela diferença das receitas nos anos de 1889 e 1880, dividido pela receita em 1880. Cidade é variável **qualitativa nominal** e Taxa de Crescimento Econômico é variável **quantitativa contínua**.
-
-```{r}
-#| echo: false
-#| label: fig-grafico-4
-#| fig-cap: Receita anual por cidade
-
-relatorio_vendas %>%
-  group_by(ano, NameCity) %>% 
-  summarise(receita = sum(receitaVenda)) %>%
-  ungroup() %>% 
-  select(ano, NameCity, receita) %>%
-  ggplot(aes(ano,receita, colour = NameCity)) +
-  scale_x_continuous(breaks = seq(1880, 1889, by = 2)) +
-  #geom_smooth(method = lm, se = FALSE, colour = "lightgrey") +
-  geom_point(size = 3, alpha = .5) +
-  geom_line(size = 1) +
-  #facet_wrap(~NameCity, nrow = 2) +
-  labs(x = "Ano", y = "Receita", colour = "Cidade") +
-  theme_estat() +
-  theme(legend.position = "right")
-
-```
-
-```{r}
-#| echo: false
-#| results: asis
-#| label: tbl-tabela-5
-#| tbl-cap: Resumo da receita das cidades nos anos de 1880 a 1889
-#| cap-location: top
-
-colnames(tabela7)[1] <- "Cidade"
-tabela7 %>% kable(digits = 2)
-```
-
-\newpage
-
-```{r}
-#| echo: false
-#| results: asis
-#| label: tbl-tabela-6
-#| tbl-cap: Taxa de crescimento econômico (%) das cidades entre 1880 e 1889
-#| cap-location: top
-
-colnames(tabela8)[1] <- "Cidade"
-tabela8 %>% kable(digits = 2)
-```
-
-\ \ \ \ A cidade de **Rio Bravo** apresentou o maior crescimento em receita anual ao longo do período analisado, destacando-se também por possuir o maior número de vendas (11290) e a maior receita média (R\$2.527,90). Observa-se que **Canoa Quebrada** realizou apenas 8.031 vendas nos 10 anos em análise, mas registrou a segunda maior receita média. Toodas As cidades demonstram bom crescimento econômico e se mostram **promissoras** para investimentos futuros, porém as cidades com maior taxa de crescimento econômico foi **Rio Bravo**, **Canoa Quebrada** e **Sussuro de Pedra**.
-
-## Análise 2
+## Variação Peso por Altura
 
 ```{r}
 #| echo: false
@@ -670,7 +509,7 @@ tabela9 <- data.frame(
 
 tabela10 <- data.frame(
   `Correlação de Pearson` = cor_hat,
-  `p-valor` = 0,
+  `p-valor` = "< 0,0001",
   `Estatística t` = cor_est) %>% t()
 ```
 
@@ -678,7 +517,7 @@ tabela10 <- data.frame(
 
 ```{r}
 #| echo: false
-#| label: fig-grafico-6
+#| label: fig-grafico-5
 #| fig-cap: Disperssão entre peso e altura dos clientes
 
 aux %>% 
@@ -689,8 +528,6 @@ aux %>%
   labs(x = "Peso (kg)", y = "altura (cm)") +
   theme_estat()
 ```
-
-\newpage
 
 Quadro 1: Principais métricas do peso dos clientes
 
@@ -723,7 +560,7 @@ Quadro 2: Principais métricas da altura dos clientes
 ```{=latex}
 \begin{center}
 \begin{tabular} { | l |
-			S[table-format = 1.2]
+			S[table-format = 2.2]
 			|}
 	\hline
 		\textbf{Estatística} & \textbf{Valor} \\
@@ -744,90 +581,7 @@ Quadro 2: Principais métricas da altura dos clientes
 
 \ \ \ \ Ao observar o gráfico de dispersão entre **peso** e **altura**, nota-se de imediato uma relação positiva entre as variáveis, assim como uma alta variabilidade. A medida que o peso aumenta a altura tende a aumentar e os pontos estão bem espalhados, indicando que, embora exista uma correlação positiva, o peso varia bastante mesmo entre clientes com estaturas semelhantes.
 
-\ \ \ \ Para realizar a análise, primeiro foram realizados dois testes de aderência de Lilliefors, a fim de verificar normalidade das variáveis **peso** e **altura**. As hipóteses nulas $H_0$ consideram que o peso dos clientes provém de uma população normalmente distribuída com média igual a 75,18849 e variância igual a 141,9977, e que a altura dos clientes provém de uma população normalmente distribuída com média igual a 171,4808 e variância igual a 97,37976. As hipóteses alternativas $H_1$ afirmam que os dados não seguem essas distribuições propostas. Os parâmetros de média e variância utilizados nessas distribuições correspondem às médias e variâncias amostrais da respectiva variável (ver Quadros 1 e 2).
-
-```{=latex}
-\begin{center}
-\hipoteses{Peso $\sim Normal(\mu = 75,18849; \sigma^2 = 141,9977)$}{Peso segue outra distribuição}
-\hipoteses{Altura $\sim Normal(\mu = 171,4808; \sigma^2 = 97,37976)$}{Altura segue outra distribuição}
-\end{center}
-```
-
-\ \ \ \ Sob $H_0$, os p-valores encontrados foram 0,24463150 e 0,3278868, respectivamente, ao nível de significância de 5% não há evidência suficiente para rejeitar as hipóteses nulas. Sugerindo que ambos os dados seguem uma distribuição aproximadamente normal.
-
-```{r}
-#| echo: false
-#| results: asis
-#| label: tbl-tabela-7
-#| tbl-cap: Resultados dos testes
-
-colnames(tabela9)[c(2, 3)] <- c("p-valor", "Estatística D")
-tabela9 %>% kable()
-```
-
-\ \ \ \ Além disso, a suposição de normalidade também foram avaliadas gráficamente por meio da comparação da densidade amostral com a densidade teórica, e a análise dos quantis observados com os quantis teóricos da distribuição normal.
-
-```{r}
-#| echo: false
-#| label: fig-grafico-7
-#| fig-cap: Distribuição empírica e normal teórica do peso
-
-aux %>%
-  ggplot(aes(x = peso_kg)) +
-  geom_histogram(aes( y = ..density.., fill = "Distribuição empírica"), binwidth = 5, colour = "white") +
-  stat_function(
-    fun = dnorm,
-    args = list(mean = p_media,
-                sd = p_sd),
-    aes(colour = "Distribuição teórica"),
-    size = 1.2, linetype = "dashed") +
-  labs(x = "Peso (kg)", y = "Densidade", fill = NULL, colour = NULL) +
-  theme_estat() +
-  scale_colour_manual(values = c("Distribuição teórica" = "#003366"))
-```
-
-```{r}
-#| echo: false
-#| label: fig-grafico-8
-#| fig-cap: Distribuição empírica e normal teórica da altura
-
-aux %>% 
-  ggplot(aes(x = altura_cm)) +
-  geom_histogram(aes( y = ..density.., fill = "Distribuição empírica"), binwidth = 5, colour = "white") +
-  stat_function(
-    fun = dnorm,
-    args = list(mean = h_media,
-                sd = h_sd),
-    aes(colour = "Distribuição teórica"),
-    size = 1.2, linetype = "dashed") +
-  labs(x = "Altura (cm)", y = "Densidade", fill = NULL, colour = NULL) +
-  theme_estat() +
-  scale_colour_manual(values = c("Distribuição teórica" = "#003366"))
-```
-
-```{r}
-#| echo: false
-#| label: fig-grafico-9
-#| fig-cap: Q-Q plot do peso
-
-qqnorm(aux$peso_kg, ylab = "Quantis amostrais",
-       xlab = "Quantis teóricos",
-       main = NULL)
-qqline(aux$peso_kg, col = "red", lwd = 2)
-```
-
-```{r}
-#| echo: false
-#| label: fig-grafico-10
-#| fig-cap: Q-Q plot da altura
-
-qqnorm(aux$altura_cm, ylab = "Quantis amostrai",
-       xlab = "Quantis teóricos",
-       main = NULL)
-qqline(aux$altura_cm, col = "red", lwd = 2)
-```
-
-\ \ \ \ Em seguida, após a verificação da normalidade das variáveis, foi realizado o teste de correlação de Pearson sob as seguintes hipóteses.
+\ \ \ \ A normalidade das variáveis **peso** e **altura** foi verificada a fim de assegurar a adequação dos dados às suposições do teste. Em seguida, realizou-se o teste de correlação de Pearson, considerando as seguintes hipóteses.
 
 ```{=latex}
 \begin{center}
@@ -835,14 +589,10 @@ qqline(aux$altura_cm, col = "red", lwd = 2)
 \end{center}
 ```
 
-\ \ \ \ Sob $H_0$, foi obtido um p-valor $< 2,2 \times 10^{-16}$, ao nível de significância de 5% há evidencia estatística suficiente para rejeitar a hipótese nula, indicando que há correlação linear entre as variáveis. O estimador do coeficiente de correlação, o p-valor, a estatística do teste e o intervalo de confiança a 95% estão na seguinte tabela.
-
-\newpage
-
 ```{r}
 #| echo: false
 #| results: asis
-#| label: tbl-tabela-8
+#| label: tbl-tabela-2
 #| tbl-cap: Resultados da correlação de Pearson entre peso e altura
 
 colnames(tabela10) <- ""
@@ -850,6 +600,7 @@ rownames(tabela10) <- c("$\\hat{\\rho}$", "p-valor", "Estatística t")
 tabela10 %>% kable(escape = FALSE)
 ```
 
+\ \ \ \ Sob $H_0$, foi obtido um p-valor $< 2,2 \times 10^{-16}$. Ao nível de significância de 5% há evidencia estatística suficiente para rejeitar a hipótese nula, indicando que há correlação linear entre as variáveis. O **estimador** do coeficiente de correlação, o **p-valor** e a **estatística do teste** estão apresentados na Tabela 2. O intervalo de confiança, ao nível de 95%, é mostrado a seguir.
 
 ```{=latex}
 \begin{center}
@@ -863,101 +614,9 @@ tabela10 %>% kable(escape = FALSE)
 \end{center}
 ```
 
-\ \ \ \ O estimador da correlação de Pearson ($0,5 < \hat{\rho} < 0,7$) indica que na população de clientes há uma relação linear positiva moderada, quase alta, entre o **peso** e a **altura**. Isso é, à medida que a altura dos clientes aumenta, o peso também tende a aumentar. O p-valor muito baixo fornece evidência estatistica que a correlação linear é não nula, sugerindo que que a relação observada dificilmente ocorreu ao acaso. O intervalo de confiança indica que com 95% de confiança no procedimento de estimação, o valor verdadeiro da correlação populacional estaria dentro do intervalo $[0,6737991; 0,7190173]$. Assim, podemos conlcuir que em geral, **clientes mais altos pesam mais**.
+\ \ \ \ O estimador da correlação de Pearson ($0,5 < \hat{\rho} < 0,7$) indica que na população de clientes há uma relação linear positiva moderada, quase alta, entre o **peso** e a **altura**. Isso é, à medida que a altura dos clientes aumenta, o peso também tende a aumentar. O p-valor muito baixo fornece evidência estatística que a correlação linear é não nula, sugerindo que que a relação observada dificilmente ocorreu ao acaso. O intervalo de confiança indica que com 95% de confiança no procedimento de estimação, o valor verdadeiro da correlação populacional estaria dentro do intervalo $[0,6737991; 0,7190173]$. Assim, podemos conlcuir que em geral, **clientes mais altos pesam mais**.
 
-## Análise do IMC (Extra)
-
-```{r}
-#| echo: false
-
-quadro3 <- aux %>%
-  summarise(
-    Média = mean(IMC),
-    Mediana = median(IMC),
-    `Desvio Padrão` = sd(IMC),
-    Variância = var(IMC),
-    Mínimo = min(IMC),
-    Máximo = max(IMC),
-    `1º Quartil` = quantile(IMC, 0.25),
-    `3º Quartil` = quantile(IMC, 0.75)
-  ) %>% t()
-
-tabela13 <- aux %>%
-  group_by(FaixaPeso) %>%
-  summarise(
-    frequencia = n(),
-    "percentual (%)" = (n()/nrow(aux)) * 100
-    ) %>% 
-  arrange(desc(frequencia))
-```
-
-\ \ \ \ O objetivo desta análise é examinar em maior detalhe o **Índice de Massa Corporal (IMC)** e a **Faixa de Peso** dos clientes, obtido a partir da relação entre o peso em quilogramas e o quadrado da altura em metros (conferir Anexo 3 e 4). IMC é variavél **quantitativa contínua** e Faixa de Peso é **qualitativa ordinal**.
-
-```{r}
-#| echo: false
-#| label: fig-grafico-11
-#| fig-cap: Distribuição do IMC dos clientes
-
-aux %>%
-  ggplot(aes(x = IMC)) +
-  geom_histogram(binwidth = 1, fill = "#A11D21", colour = "white") +
-  labs(x = "IMC", y = "Frequência", title = "Distribuição do IMC dos clientes") +
-  theme_estat()
-```
-
-\newpage
-
-Quadro 3: Principais métricas do IMC dos clientes
-
-\vspace{.2cm}
-```{=latex}
-\begin{center}
-\begin{tabular} { | l |
-			S[table-format = 1.2]
-			|}
-	\hline
-		\textbf{Estatística} & \textbf{Valor} \\
-		\hline
-		Média & 25,5 \\
-		Desvio Padrão & 2,96 \\
-		Variância & 8,75 \\
-		Mínimo & 16,15 \\
-		1º Quartil & 23,51 \\
-		Mediana & 25,51 \\
-		3º Quartil & 27,39 \\
-		Máximo & 34,99 \\
-	\hline
-	\end{tabular}
-\end{center}
-```
-\vspace{.2cm}
-
-```{r}
-#| echo: false
-#| label: fig-grafico-12
-#| fig-cap: Distribuição das faixas de peso dos clientes
-
-
-aux %>%
-  ggplot(aes(x = FaixaPeso)) +
-  geom_bar(fill = "#A11D21", colour = "white") +
-  labs(x = "Faixa de Peso", y = "Frequência", title = "Distribuição das faixas de peso dos clientes") +
-  theme_estat()
-```
-
-```{r}
-#| echo: false
-#| results: asis
-#| label: tbl-tabela-9
-#| tbl-cap: Frequência e percentual dos clientes por faixa de peso
-
-colnames(tabela13)[1] <- "Faixa de Peso"
-tabela13 %>% kable(digits = 2)
-```
-
-\ \ \ \ A mediana do **IMC** foi de 25,51, indicando que pelo menos metade da população da região encontra-se na faixa de **sobrepeso**. Observou-se também um número reduzido de casos de **obesidade** (165) e de **abaixo do peso** (12), correspondendo a aproximadamente 8,29% e 0,60% da amostra de clientes, respectivamente. 
-
-## Análise 3
+## Idade dos clientes de Âmbar Seco a depender da loja
 
 ```{r}
 #| echo: false
@@ -980,13 +639,14 @@ tabela11 <- ambar_seco %>%
 
 ```{r}
 #| echo: false
-#| label: fig-grafico-13
+#| label: fig-grafico-6
 #| fig-cap: Boxplot da idade dos clientes em Âmbar Seco
 
 ambar_seco %>% 
   group_by(NameStore, Age) %>%
   ggplot(aes(NameStore, Age)) +
-  geom_boxplot(fill = "#A11D21") +
+  geom_boxplot(fill = "#A11D21", width = .5) +
+  stat_summary(fun = "mean", geom = "point", shape = 23, size = 3, fill = "grey") +
   labs(x = "Loja", y = "Idade") +
   theme_estat()
 ```
@@ -994,76 +654,133 @@ ambar_seco %>%
 ```{r}
 #| echo: false
 #| results: asis
-#| label: tbl-tabela-10
+#| label: tbl-tabela-3
 #| tbl-cap: Resumo da idade dos clientes em Âmbar Seco
 
 colnames(tabela11)[1] <- "Loja"
 tabela11 %>% kable(digits = 2)
 ```
 
-\ \ \ \ Da Figura 10, e da disntância interquantílica na Tabela 11, podemos observar que as lojas **Vendinha Rápida** e **Banco Careca** apresentam uma distribuição de idades de clientes mais concentrada. Isso pode ser visto pelo menor tamanho das caixas no boxplot, e pelos menores valores de DIQ. Enquanto as lojas **Saloon** e **Ferraria Seca** possuem maior variação na idade dos clientes. Possuem caixas maiores e maiores valores de DIQ. A loja **Vendinha Rápida** se destaca por apresentar a maior média e mediana de idade, indicando que seus clientes tendem a ser mais velhos em comparação às demais lojas na cidade de Âmbar Seco. Por outro lado, a **Ferraria Seca** apresentou menor média e mediana, sugerindo um público mais jovens, no entando, o maior desvio padrão e maior disntância interquantílica, indicam que o perfil étario dos clientes é mais vasto e heterogênio.
+\ \ \ \ Da Figura 6, e da disntância interquantílica na Tabela 3, podemos observar que as lojas **Vendinha Rápida** e **Banco Careca** apresentam uma distribuição de idades de clientes mais concentrada. Isso pode ser visto pelo menor tamanho das caixas no boxplot, e pelos menores valores de DIQ. Enquanto as lojas **Saloon** e **Ferraria Seca** possuem maior variação na idade dos clientes. Possuem caixas maiores e maiores valores de DIQ. A loja **Vendinha Rápida** se destaca por apresentar a maior média (39,76) e mediana (40) de idade, indicando que seus clientes tendem a ser mais velhos em comparação às demais lojas na cidade de Âmbar Seco. Por outro lado, a **Ferraria Seca** apresentou menor média (33,95) e mediana (31), sugerindo um público mais jovens, no entando, o maior desvio padrão (13,51) e maior disntância interquantílica (15), indicam que o perfil étario dos clientes é mais vasto e heterogênio.
 
-## Análise 4
+## Os top 3 produtos mais vendidos nas top 3 lojas com maior receita em 1889
 
 ```{r}
 #| echo: false
 
-
 tabela12 <- relatorio_vendas %>%
+  filter(ano == 1889) %>%
   group_by(NameStore) %>%
   summarize(receitaLoja = sum(receitaVenda)) %>%
-  arrange(desc(receitaLoja))
+  arrange(desc(receitaLoja)) %>% 
+  slice(1:3)
 
 top3_lojas <- tabela12 %>%
   slice(1:3) %>%
   pull(NameStore)
 
 aux2 <- relatorio_vendas %>% 
-  select(NameStore, NameProduct, Quantity,ano, receitaVenda) %>%
+  select(SaleID, NameStore, NameProduct, Quantity, ano, receitaVenda) %>%
   group_by(NameStore) %>% 
   mutate(receitaLoja = sum(receitaVenda)) %>% 
-  distinct() %>%
   filter(ano == 1889, NameStore %in% top3_lojas)
 
 tabela13 <- aux2 %>% 
   group_by(NameProduct) %>%
-  summarize(quantidadeVendida = sum(Quantity)) %>%
+  summarize(quantidadeVendida = sum(Quantity),
+            receitaGerada = sum(receitaVenda)) %>%
   arrange(desc(quantidadeVendida))
 
-top3_produtos <- tabela13 %>%
-  slice(1:5) %>%
+top3_produtos_fa <- aux2 %>% 
+  filter(NameStore == "Ferraria Apache") %>% 
+  group_by(NameProduct) %>%
+  summarize(quantidadeVendida = sum(Quantity)) %>%
+  arrange(desc(quantidadeVendida)) %>%
+  slice(1:3) %>% 
   pull(NameProduct)
 
-tabela14 <- aux2 %>%
-  filter(NameProduct %in% top3_produtos) %>%
+top3_produtos_of <- aux2 %>% 
+  filter(NameStore == "Loja Ouro Fino") %>% 
+  group_by(NameProduct) %>%
+  summarize(quantidadeVendida = sum(Quantity)) %>%
+  arrange(desc(quantidadeVendida)) %>%
+  slice(1:3) %>% 
+  pull(NameProduct)
+
+top3_produtos_tt <- aux2 %>% 
+  filter(NameStore == "Loja TendTudo") %>% 
+  group_by(NameProduct) %>%
+  summarize(quantidadeVendida = sum(Quantity)) %>%
+  arrange(desc(quantidadeVendida)) %>%
+  slice(1:3) %>% 
+  pull(NameProduct)
+
+tabela14 <- aux2 %>% 
+  mutate(NameStore = factor(NameStore, 
+                            levels = c("Loja Ouro Fino", "Loja TendTudo", "Ferraria Apache"))) %>%
   group_by(NameStore, NameProduct) %>%
-  summarise(
-    quantidadeVendida = sum(Quantity)
+  summarize(
+    quantidadeVendida = sum(Quantity),
+    receitaGerada = sum(receitaVenda),
+    .groups = "drop"
+  ) %>% 
+  arrange(NameStore, desc(quantidadeVendida)) %>% 
+  slice(c(1:3, 11:13, 21:23))
+
+classes_of <- aux2 %>%
+  filter(NameStore == "Loja Ouro Fino", NameProduct %in% top3_produtos_tt) %>% 
+  count(NameProduct) %>%
+  mutate(
+    freq = n %>% percent(),
   ) %>%
-  arrange(NameStore, desc(quantidadeVendida))
+  mutate(
+    freq = gsub("\\.", ",", freq) %>% paste("%", sep = ""),
+    label = str_c(n, " (", freq, ")") %>% str_squish()
+  )
+
+classes_tt <- aux2 %>%
+  filter(NameStore == "Loja TendTudo", NameProduct %in% top3_produtos_tt) %>% 
+  count(NameProduct) %>%
+  mutate(
+    freq = n %>% percent(),
+  ) %>%
+  mutate(
+    freq = gsub("\\.", ",", freq) %>% paste("%", sep = ""),
+    label = str_c(n, " (", freq, ")") %>% str_squish()
+  )
+
+classes_fa <- aux2 %>%
+  filter(NameStore == "Ferraria Apache", NameProduct %in% top3_produtos_tt) %>% 
+  count(NameProduct) %>%
+  mutate(
+    freq = n %>% percent(),
+  ) %>%
+  mutate(
+    freq = gsub("\\.", ",", freq) %>% paste("%", sep = ""),
+    label = str_c(n, " (", freq, ")") %>% str_squish()
+  )
 ```
 
-\ \ \ \ Por fim, o objetivo desta análise é identificar os três **produtos mais vendidos** nas três **lojas com maior receita** no ano de 1889.
+\ \ \ \ Por fim, o objetivo desta análise é identificar os três **produtos mais vendidos** nas três **lojas com maior receita** no ano de 1889. As lojas que apresentaram as maiores receitas nesse ano foram: **Loja Ouro Fino** (R\$ 197.312,50), **Loja TendTudo** (R\$ 196.340,30) e **Ferraria Apache** (R\$ 181.689,10).
 
 ```{r}
 #| echo: false
 #| results: asis
-#| label: tbl-tabela-11
-#| tbl-cap: Lojas com maior receita em 1889
+#| label: tbl-tabela-4
+#| tbl-cap: Top 3 lojas com maior receita em 1889
 
-colnames(tabela12)[c(1, 2)] <- c("Loja", "Receita")
-tabela12 %>% slice(1:3) %>% kable()
+colnames(tabela12) <- c("Loja", "Receita (R$)")
+tabela12 %>% kable(digits = c(0, 2))
 ```
-
 
 ```{r}
 #| echo: false
 #| results: asis
-#| label: tbl-tabela-12
-#| tbl-cap: Produtos mais vendidos nas lojas com maior receita em 1889
+#| label: tbl-tabela-5
+#| tbl-cap: Produtos mais vendidos nas top 3 lojas com maior receita
 
-colnames(tabela13) <- c("Produto", "Quantidade Vendida")
-tabela13 %>% kable()
+colnames(tabela13) <- c("Produto", "Quantidade Vendida", "Receita Gerada (R$)")
+tabela13 %>% kable(digits = c(0, 0, 2))
 ```
 
 \newpage
@@ -1071,18 +788,87 @@ tabela13 %>% kable()
 ```{r}
 #| echo: false
 #| results: asis
-#| label: tbl-tabela-13
-#| tbl-cap: Produtos mais vendidos separado por lojas
+#| label: tbl-tabela-6
+#| tbl-cap: Top 3 produtos nas top 3 lojas com maior receita em 1889
 
-colnames(tabela14)[c(1, 2)] <- c("Loja", "Produto", "Quantidade Vendida")
-tabela14 %>% kable() %>% collapse_rows(columns = 1)
+colnames(tabela14) <- c("Loja", "Produto", "Quantidade Vendida", "Receita Gerada (R$)")
+tabela14 %>% kable(digits = c(0, 0, 0, 2)) %>% collapse_rows(columns = 1)
 ```
 
-\ \ \ \ As lojas com maior receita em 1889 foram **Ferraria Apache**, **Loja Ouro Fino** e **Loja TendTudo**. O produtos mais vendido nessas lojas foi o **Chapéu de Couro**, que contabilizou 32 vendas. Empatados para segundo lugar foram as **Botas de Couro**, a **Espingarda**, a **Sela** e o **Whisky**, com 30 vendas. O **Chapéu de Couro** foi o produto mais popular (ou empatou com o produto mais popular) nas três lojas com maior receita no ano de 1889. Esses resultados sugerem que os clientes têm preferência pelo chapeu, porém é importante notar que a diferença da quantidade de itens vendidos é baixa, variando apenas por uma ou duas unidades entre o item mais vendido e o segundo mais vendido (ver Tabelas 13 e 14).
+```{r}
+#| echo: false
+#| label: fig-grafico-7
+#| fig-cap: Top 3 produtos mais vendidos na Loja Ouro Fino
+
+ggplot(classes_of) +
+  aes(
+    x = fct_reorder(NameProduct, n, .desc = T),
+    y = n,
+    label = label
+  ) +
+  geom_bar(stat = "identity", fill = "#A11D21", width = 0.7) +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, # hjust = .5,
+    size = 3
+  ) +
+  labs(x = "Produto", y = "Frequência") +
+  theme_estat()
+```
+
+```{r}
+#| echo: false
+#| label: fig-grafico-8
+#| fig-cap: Top 3 produtos mais vendidos na Loja TendTudo
+
+ggplot(classes_tt) +
+  aes(
+    x = fct_reorder(NameProduct, n, .desc = T),
+    y = n,
+    label = label
+  ) +
+  geom_bar(stat = "identity", fill = "#A11D21", width = 0.7) +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, # hjust = .5,
+    size = 3
+  ) +
+  labs(x = "Produto", y = "Frequência") +
+  theme_estat()
+```
+
+```{r}
+#| echo: false
+#| label: fig-grafico-9
+#| fig-cap: Top 3 produtos mais vendidos na Ferraria Apache
+
+ggplot(classes_fa) +
+  aes(
+    x = fct_reorder(NameProduct, n, .desc = T),
+    y = n,
+    label = label
+  ) +
+  geom_bar(stat = "identity", fill = "#A11D21", width = 0.7) +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, # hjust = .5,
+    size = 3
+  ) +
+  labs(x = "Produto", y = "Frequência") +
+  theme_estat()
+```
+
+\ \ \ \  Pode-se observar da tabela 4 que o **Whisky** foi o produto mais vendido das três lojas em análise. O desempenho desse produto nas diferentes lojas sugere que é um item popular entre os consumidores da região, assim como o **Chapeu de Coro** e a **Espingarda** que aparecem mais de uma vez na Tabela 5. Da Tabela 5, observa-se que o produto mais vendido na loja com maior receita em 1889 (**Loja Ouro Fino**) foram as **Botas de Couro**, com 52 unidades vendidas, o que corresponde a **6,02%** da receita anual. Entre as três lojas analisadas, o produto com maior volume de vendas foi a **Espingarda**, da **Loja TendTudo**, com 53 unidades vendidas.
 
 # Conclusão
 
-\ \ \ \ A região mostrou-se muito promissora para investimentos, com crescimento expressivo na receita média ao longo do período analisado. A análise dos produtos revelou que itens como o **Cavalo** e o **Chapéu de Couro** tiveram destaque em termos de receita e quantidade vendida, respectivamente. As cidades da região também apresentaram crescimento econômico significativo, com **Rio Bravo** liderando nesse aspecto. Também foi verificado que o peso e a altura dos clientes está positivamente correlacionada. As lojas de **Âmbar Seco** possuem lojas com maior concentração de idade, e lojas mais heterogêneas quanto a faixa etária. E por fim, podemos observar que no ultimo ano dá série historica em análise, o **Chapeu de Coro** foi o item mais vendido das lojas que tiverem maior receita no ano, mesmo que apenas por duas unidades.
+\ \ \ \ Ao longo deste relatório, foram exploradas diversas análises estatísticas para compreender o comportamento das vendas e dos clientes da região durante o período de 1880 a 1889. A análise da receita média revelou um crescimento significativo ao longo dos anos, indicando um potencial econômico promissor.
+
+\ \ \ \ A investigação da relação entre **peso** e **altura** dos clientes revelou alta variabilidade, indicando que indivíduos com pesos semelhantes podem apresentar alturas bastante distintas. Além disso, observou-se uma correlação positiva moderada, sugerindo que, de modo geral, clientes mais altos tendem a pesar mais.
+
+\ \ \ \ O perfil etário dos clientes em **Âmbar Seco** variou significativamente entre as lojas, com as lojas **Ferraria Seca** e **Saloon** apresentando uma faixas etárias mais amplas, enquanto **Banco Careca** e **Vendinha Rápida** uma faixa etária mais concentrada.
+
+\ \ \ \ Finalmente, a análise dos produtos mais vendidos nas lojas com maior receita em 1889 destacou itens populares entre os consumidores, como o **Whisky**, a **Espingarda** e o **Chapeu de Couro**. 
 
 # Anexo
 
@@ -1113,22 +899,7 @@ tabela14 %>% kable() %>% collapse_rows(columns = 1)
 -   ClientID: Chave do cliente
 -   Quantity: Quantidade comprada deste produto
 
-2. Cálculo da taxa de crescimento econômico
-
-$$
-\text{Taxa de crescimento econômico} = \frac{Receita_{\ final} - Receita_{\ inicial}}{Receita_{\ inicial}} \times 100
-$$
-
-3.  Cálculo do Índice de Massa Corporal (IMC)
-
-$$
-IMC = \frac{peso(kg)}{altura(m)^2}
-$$
-
-4.  Classificação do IMC segundo a Organização Mundial da Saúde (OMS)
-
-- Abaixo do peso: IMC < 18,5
-- Peso normal: 18,5 ≤ IMC < 24,9
-- Sobrepeso: 25 ≤ IMC < 29,9
-- Obesidade: IMC ≥ 30
-
+2. 
+```{r}
+sessionInfo()
+```

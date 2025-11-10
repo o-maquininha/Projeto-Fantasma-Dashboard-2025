@@ -155,58 +155,152 @@ print_quadro_resumo <- function(data, var_name, title="Medidas resumo da(o) [nom
 
 # Quadro simples
 
-quadro_simples <- function(data, var_name, digits = 2) {
-  var_name <- substitute(var_name)
+quadro_simples <- function(data, var_name, quali = FALSE, medida = NULL, digits = 2) {
+  vars <- as.list(substitute(var_name))[-1]
+  if (length(vars) == 0) {
+    vars <- list(substitute(var_name))
+  }
   
-  data <- data %>%
-    summarize(
-      `Média` = round(mean(!!sym(var_name)), digits),
-      `Desvio Padrão` = round(sd(!!sym(var_name)), digits),
-      `Variância` = round(var(!!sym(var_name)), digits),
-      `Mínimo` = round(min(!!sym(var_name)), digits),
-      `1º Quartil` = round(quantile(!!sym(var_name), probs = .25), digits),
-      `Mediana` = round(quantile(!!sym(var_name), probs = .5), digits),
-      `3º Quartil` = round(quantile(!!sym(var_name), probs = .75), digits),
-      `Máximo` = round(max(!!sym(var_name)), digits)
+  calc_stats <- function(x) {
+    c(
+      Média = round(mean(x, na.rm = TRUE), digits),
+      `Desvio Padrão` = round(sd(x, na.rm = TRUE), digits),
+      Variância = round(var(x, na.rm = TRUE), digits),
+      Mínimo = round(min(x, na.rm = TRUE), digits),
+      `1º Quartil` = round(quantile(x, probs = .25, na.rm = TRUE), digits),
+      Mediana = round(quantile(x, probs = .5, na.rm = TRUE), digits),
+      `3º Quartil` = round(quantile(x, probs = .75, na.rm = TRUE), digits),
+      Máximo = round(max(x, na.rm = TRUE), digits),
+      DIQ = round(IQR(x, na.rm = TRUE), digits)
     )
-  
-  col_count <- ncol(data)
-  
-  latex <- str_c(
-    "|Estatística       |        Valor|\n",
-    "|:-------------|---------:|\n"
-  )
-  
-  for (i in seq_len(col_count)) {
+  }
+
+  if (quali) {
+    v <- as.character(vars[[1]])
+    m <- as.character(substitute(medida))
+    
+    data <- data %>%
+      group_by(!!sym(v)) %>%
+      summarise(
+        `Média` = round(mean(!!sym(m), na.rm = TRUE), digits),
+        `Desvio Padrão` = round(sd(!!sym(m), na.rm = TRUE), digits),
+        `Mínimo` = round(min(!!sym(m), na.rm = TRUE), digits),
+        `Mediana` = round(median(!!sym(m), na.rm = TRUE), digits),
+        `Máximo` = round(max(!!sym(m), na.rm = TRUE), digits)
+      )
+    
+    data <- data %>% arrange(desc(Média))
+    
     latex <- str_c(
-      latex,
-      "|", colnames(data)[i], " | ", data[[i]], "|\n"
+      "|", v, "|Média|Desvio Padrão|Mínimo|Mediana|Máximo|\n",
+      "|:-----------|---------:|---------:|---------:|---------:|---------:|\n"
+      )
+    
+    for (i in seq_len(nrow(data))) {
+      latex <- str_c(
+        latex,
+        "|", data[[v]][i], "|",
+        paste(data[i, -1], collapse = "|"), "|\n"
+      )
+    }
+    
+    writeLines(latex)
+    return(invisible(NULL))
+  }
+  
+  if (length(vars) == 1) {
+    v <- as.character(vars[[1]])
+    data <- data %>%
+      summarise(
+        `Média` = round(mean(!!sym(v), na.rm = TRUE), digits),
+        `Desvio Padrão` = round(sd(!!sym(v), na.rm = TRUE), digits),
+        `Variância` = round(var(!!sym(v), na.rm = TRUE), digits),
+        `Mínimo` = round(min(!!sym(v), na.rm = TRUE), digits),
+        `1º Quartil` = round(quantile(!!sym(v), probs = .25, na.rm = TRUE), digits),
+        `Mediana` = round(quantile(!!sym(v), probs = .5, na.rm = TRUE), digits),
+        `3º Quartil` = round(quantile(!!sym(v), probs = .75, na.rm = TRUE), digits),
+        `Máximo` = round(max(!!sym(v), na.rm = TRUE), digits),
+        DIQ = round(IQR(!!sym(v), na.rm = TRUE), digits)
+      )
+    
+    data <- data %>% arrange(desc(Média))
+    
+    latex <- str_c(
+      "|Estatística|Valor|\n",
+      "|:-------------|---------:|\n"
+    )
+    
+    for (i in seq_len(ncol(data))) {
+      latex <- str_c(
+        latex,
+        "|", colnames(data)[i], " | ", data[[i]], "|\n"
+      )
+    }
+    
+    writeLines(latex)
+    
+  } else {
+    resultados <- lapply(vars, function(v) calc_stats(data[[as.character(v)]]))
+    tabela <- as.data.frame(resultados)
+    colnames(tabela) <- sapply(vars, as.character)
+    tabela <- tibble::rownames_to_column(tabela, var = "Estatística")
+    
+    latex <- "|Estatística|" %>%
+      str_c(paste0(colnames(tabela)[-1], collapse = "|"), "|\n") %>%
+      str_c("|:-------------|", paste(rep("---------:", ncol(tabela) - 1), collapse = "|"), "|\n")
+    
+    for (i in seq_len(nrow(tabela))) {
+      latex <- str_c(
+        latex,
+        "|", tabela$Estatística[i], "|",
+        paste(tabela[i, -1], collapse = "|"), "|\n"
+      )
+    }
+    
+    writeLines(latex)
+  }
+}
+
+print_quadro_simples <- function(data, var_name, quali = FALSE, medida = NULL,
+                                 title = "Principais métricas do(a) [nome da variável]",
+                                 digits = 2, cb = FALSE) {
+  
+  vars <- as.list(substitute(var_name))[-1]
+  
+  if (length(vars) == 0) {
+    vars <- list(substitute(var_name))
+  }
+  
+  if (length(vars) != 1) {
+    title <- "Medidas resumo"
+  } else {
+    var_name <- deparse(substitute(var_name))
+    title <- str_replace(title, "\\[nome da variável\\]", var_name)
+  }
+  
+  if (quali) {
+    chunk <- str_c(
+      "```{r}\n",
+      "#| echo: false\n",
+      "#| results: asis\n\n",
+      "cat(\"Quadro: ", title, "\\n\\n\")\n\n",
+      "quadro_simples(", deparse(substitute(data)), ", ", deparse(substitute(var_name)), ", quali = ", deparse(substitute(quali)), ", medida = ", deparse(substitute(medida)), ", digits = ", digits, ")\n",
+      "```")
+    }
+  else {
+    chunk <- str_c(
+      "```{r}\n",
+      "#| echo: false\n",
+      "#| results: asis\n\n",
+      "cat(\"Quadro: ", title, "\\n\\n\")\n\n",
+      "quadro_simples(", deparse(substitute(data)), ", ", deparse(substitute(var_name)), ", digits = ", digits, ")\n",
+      "```"
     )
   }
   
-  writeLines(latex)
-}
-
-print_quadro_simples <- function(data, var_name,
-                                   title = "Principais métricas do(a) [nome da variável]",
-                                   digits = 2, cb = FALSE) {
-  var_name <- deparse(substitute(var_name))
-  title <- str_replace(title, "\\[nome da variável\\]", var_name)
-  
-  chunk <- str_c(
-    "```{r}\n",
-    "#| echo: false\n",
-    "#| results: asis\n\n",
-    "cat(\"Quadro: ", title, "\\n\\n\")\n\n",
-    "quadro_simples(", deparse(substitute(data)), ", ", var_name, ", digits = ", digits, ")\n",
-    "```"
-  )
-  
   if (!cb) {
     writeLines(chunk)
-  } 
-  
-  else {
+  } else {
     writeClipboard(chunk)
     message("o chunck está no Cntrl + V")
   }

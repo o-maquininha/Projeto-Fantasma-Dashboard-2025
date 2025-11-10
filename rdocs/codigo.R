@@ -2,7 +2,6 @@ library(readxl)
 library(tidyverse)
 library(knitr)
 library(kableExtra)
-library(xtable)
 source("rdocs/source/packages.R")
 
 faixa_peso <- function(imc){
@@ -291,6 +290,7 @@ tabela11 <- ambar_seco %>%
 #-------------------Analise 4----------------------
 
 tabela12 <- relatorio_vendas %>%
+  filter(ano == 1889) %>%
   group_by(NameStore) %>%
   summarize(receitaLoja = sum(receitaVenda)) %>%
   arrange(desc(receitaLoja))
@@ -300,10 +300,9 @@ top3_lojas <- tabela12 %>%
   pull(NameStore)
 
 aux2 <- relatorio_vendas %>% 
-  select(NameStore, NameProduct, Quantity,ano, receitaVenda) %>%
+  select(SaleID, NameStore, NameProduct, Quantity, ano, receitaVenda) %>%
   group_by(NameStore) %>% 
   mutate(receitaLoja = sum(receitaVenda)) %>% 
-  distinct() %>%
   filter(ano == 1889, NameStore %in% top3_lojas)
 
 tabela13 <- aux2 %>% 
@@ -312,14 +311,14 @@ tabela13 <- aux2 %>%
   arrange(desc(quantidadeVendida))
 
 top3_produtos <- tabela13 %>%
-  slice(1:5) %>%
+  slice(1:3) %>%
   pull(NameProduct)
 
 tabela14 <- aux2 %>%
-  filter(NameProduct %in% top3_produtos) %>%
   group_by(NameStore, NameProduct) %>%
   summarise(
     quantidadeVendida = sum(Quantity),
     receitaGerada = sum(receitaVenda)
   ) %>%
-  arrange(NameStore, desc(quantidadeVendida))
+  arrange(NameStore, desc(quantidadeVendida)) %>% 
+  
