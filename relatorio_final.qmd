@@ -59,7 +59,7 @@ relatorio_vendas <- relatorio_vendas %>%
 
 \ \ \ \ O objetivo deste relatório é apresentar uma análise dos dados, visando compreender o comportamento das vendas e dos clientes da região. O escopo das análises foi a **receita média** das lojas, a variação do **peso** por **altura**, a idade dos clientes de **Âmbar Seco** e os três **produtos mais vendidos** nas lojas com maior receita. As técnicas empregadas incluíram análises exploratórias, medidas descritivas, gráficos de dispersão e boxplots, testes de normalidade, correlação de Pearson e intervalos de confiança.
 
-\ \ \ \ Os dados foram fornecidos pela ESTAT – Consultoria Estatística. O conjunto de dados é composto por 19.885 observações de compras realizadas por 1.990 clientes, envolvendo 10 tipos de produtos comercializados em 18 lojas distribuídas entre 5 cidades da região de interesse. Para mais informações sobre as variáveis, consulte o **Anexo 1**. A análise dos dados foi realizada na versão 4.5.0 do R, mais informações sobre os pacotes e ambiente utilizados estão no **Anexo 2**.
+\ \ \ \ Os dados foram fornecidos pela **ESTAT – Consultoria Estatística**. O conjunto de dados é composto por 19.885 observações de compras realizadas por 1.990 clientes, envolvendo 10 tipos de produtos comercializados em 18 lojas distribuídas entre 5 cidades da região de interesse. Para mais informações sobre as variáveis, consulte o **Anexo 1**. A análise dos dados foi realizada na versão 4.5.0 do R, mais informações sobre os pacotes e ambiente utilizados estão no **Anexo 2**.
 
 # Referencial Teórico
 
@@ -589,16 +589,21 @@ Quadro 2: Principais métricas da altura dos clientes
 \end{center}
 ```
 
-```{r}
-#| echo: false
-#| results: asis
-#| label: tbl-tabela-2
-#| tbl-cap: Resultados da correlação de Pearson entre peso e altura
+Quadro 3: Resultados do teste de correlação de Pearson entre peso e altura
 
-colnames(tabela10) <- ""
-rownames(tabela10) <- c("$\\hat{\\rho}$", "p-valor", "Estatística t")
-tabela10 %>% kable(escape = FALSE)
+\vspace{.2cm}
+```{=latex}
+\begin{center}
+    \begin{tabular}{|c c c|}
+        \hline
+        \textbf{Estatística t} & \textbf{P-valor} & \textbf{Decisão do teste} \\
+        \hline
+        43,35 & < 0,0001 & Rejeita $H_0$ \\
+        \hline
+    \end{tabular}
+\end{center}
 ```
+\vspace{.2cm}
 
 \ \ \ \ Sob $H_0$, foi obtido um p-valor $< 2,2 \times 10^{-16}$. Ao nível de significância de 5% há evidencia estatística suficiente para rejeitar a hipótese nula, indicando que há correlação linear entre as variáveis. O **estimador** do coeficiente de correlação, o **p-valor** e a **estatística do teste** estão apresentados na Tabela 2. O intervalo de confiança, ao nível de 95%, é mostrado a seguir.
 
@@ -651,17 +656,40 @@ ambar_seco %>%
   theme_estat()
 ```
 
-```{r}
-#| echo: false
-#| results: asis
-#| label: tbl-tabela-3
-#| tbl-cap: Resumo da idade dos clientes em Âmbar Seco
+\vspace{.5cm}
+Quasdro 4: Principais métricas da idade dos clientes em Âmbar Seco por loja
+\vspace{.2cm}
 
-colnames(tabela11)[1] <- "Loja"
-tabela11 %>% kable(digits = 2)
+```{=latex}
+\begin{center}
+\begin{tabular} { | l |
+			S[table-format = 2.2]
+			S[table-format = 2.2]
+			S[table-format = 3.2]
+			S[table-format = 2.2]
+			|}
+	\hline
+		\textbf{Estatística} & \textbf{Banco Careca} & \textbf{Vendinha Rápida} & \textbf{Saloon} & \textbf{Ferraria Seca} \\
+		\hline
+		Média & 34,99 & 39,76 & 35,64 & 33,95 \\
+		Desvio Padrão & 5,47 & 6,05 & 12 & 13,51 \\
+		Variância & 29,91 & 36,64 & 144,12 & 182,54 \\
+		Mínimo & 25 & 30 & 15 & 16 \\
+		1º Quartil & 31 & 34 & 27 & 24 \\
+		Mediana & 34 & 40 & 34 & 31 \\
+		3º Quartil & 40 & 44 & 39 & 39 \\
+		Máximo & 44 & 49 & 77 & 80 \\
+	\hline
+	\end{tabular}
+\end{center}
 ```
 
-\ \ \ \ Da Figura 6, e da disntância interquantílica na Tabela 3, podemos observar que as lojas **Vendinha Rápida** e **Banco Careca** apresentam uma distribuição de idades de clientes mais concentrada. Isso pode ser visto pelo menor tamanho das caixas no boxplot, e pelos menores valores de DIQ. Enquanto as lojas **Saloon** e **Ferraria Seca** possuem maior variação na idade dos clientes. Possuem caixas maiores e maiores valores de DIQ. A loja **Vendinha Rápida** se destaca por apresentar a maior média (39,76) e mediana (40) de idade, indicando que seus clientes tendem a ser mais velhos em comparação às demais lojas na cidade de Âmbar Seco. Por outro lado, a **Ferraria Seca** apresentou menor média (33,95) e mediana (31), sugerindo um público mais jovens, no entando, o maior desvio padrão (13,51) e maior disntância interquantílica (15), indicam que o perfil étario dos clientes é mais vasto e heterogênio.
+
+\ \ \ \ Da Figura 6 e dos valores de **Q1** e **Q3** apresentados no Quadro 2, observa-se que as lojas **Vendinha Rápida** e **Banco Careca** apresentam distribuições de idades mais concentradas. Isso pode ser percebido pelas caixas menores no boxplot e pela menor amplitude entre o primeiro e o terceiro quartil, indicando que a maioria dos clientes se concentra em uma faixa etária mais estreita.
+
+\ \ \ \ Em contrapartida, as lojas **Saloon** e **Ferraria Seca** exibem maior dispersão na idade dos clientes, com caixas mais miores, maior distância entre **Q1** e **Q3** e alta amplitude, 62 e 64 anos respectivamente.
+
+\ \ \ \ A loja **Vendinha Rápida** se destaca por apresentar a maior **média** (39,76) e **mediana** (40) de idade, sugerindo que seus clientes tendem a ser mais velhos em comparação às demais lojas da cidade de Âmbar Seco. Já a **Ferraria Seca** possui a menor **média** (33,95) e **mediana** (31), indicando um público mais jovem; contudo, a maior amplitude interquartílica e o desvio padrão mais elevado (13,51) sugerem um perfil etário mais diversificado e heterogêneo.
 
 ## Os top 3 produtos mais vendidos nas top 3 lojas com maior receita em 1889
 
@@ -769,21 +797,11 @@ classes_fa <- aux2 %>%
 ```{r}
 #| echo: false
 #| results: asis
-#| label: tbl-tabela-4
-#| tbl-cap: Top 3 lojas com maior receita em 1889
-
-colnames(tabela12) <- c("Loja", "Receita (R$)")
-tabela12 %>% kable(digits = c(0, 2))
-```
-
-```{r}
-#| echo: false
-#| results: asis
 #| label: tbl-tabela-5
-#| tbl-cap: Produtos mais vendidos nas top 3 lojas com maior receita em 1889
+#| tbl-cap: Top 3 produtos nas top 3 lojas com maior receita em 1889
 
-colnames(tabela13) <- c("Produto", "Quantidade Vendida", "Receita Gerada (R$)")
-tabela13 %>% kable(digits = c(0, 0, 2))
+colnames(tabela14) <- c("Loja", "Produto", "Quantidade Vendida", "Receita Gerada (R$)")
+tabela14 %>% kable(digits = c(0, 0, 0, 2)) %>% collapse_rows(columns = 1)
 ```
 
 \newpage
@@ -792,75 +810,15 @@ tabela13 %>% kable(digits = c(0, 0, 2))
 #| echo: false
 #| results: asis
 #| label: tbl-tabela-6
-#| tbl-cap: Top 3 produtos nas top 3 lojas com maior receita em 1889
+#| tbl-cap: Produtos mais vendidos nas top 3 lojas com maior receita em 1889
 
-colnames(tabela14) <- c("Loja", "Produto", "Quantidade Vendida", "Receita Gerada (R$)")
-tabela14 %>% kable(digits = c(0, 0, 0, 2)) %>% collapse_rows(columns = 1)
+colnames(tabela13) <- c("Produto", "Quantidade Vendida", "Receita Gerada (R$)")
+tabela13 %>% kable(digits = c(0, 0, 2))
 ```
 
-```{r}
-#| echo: false
-#| label: fig-grafico-7
-#| fig-cap: Top 3 produtos mais vendidos na Loja Ouro Fino
+\ \ \ \  Da Tabela 4, observa-se que o produto mais vendido na loja com maior receita em 1889 (**Loja Ouro Fino**) foram as **Botas de Couro**, com 52 unidades vendidas, o que corresponde a **6,02%** da receita anual. Entre as três lojas analisadas, o produto com maior volume de vendas foi a **Espingarda**, da **Loja TendTudo**, com 53 unidades vendidas. 
 
-ggplot(classes_of) +
-  aes(
-    x = fct_reorder(NameProduct, n, .desc = TRUE),
-    y = n,
-    label = label
-  ) +
-  geom_bar(stat = "identity", fill = "#A11D21", width = 0.7) +
-  geom_text(
-    vjust = -0.5,
-    size = 3
-  ) +
-  labs(x = "Produto", y = "Quantidade vendida") +
-  theme_estat()
-```
-
-```{r}
-#| echo: false
-#| label: fig-grafico-8
-#| fig-cap: Top 3 produtos mais vendidos na Loja TendTudo
-
-ggplot(classes_tt) +
-  aes(
-    x = fct_reorder(NameProduct, n, .desc = T),
-    y = n,
-    label = label
-  ) +
-  geom_bar(stat = "identity", fill = "#A11D21", width = 0.7) +
-  geom_text(
-    position = position_dodge(width = .9),
-    vjust = -0.5, # hjust = .5,
-    size = 3
-  ) +
-  labs(x = "Produto", y = "Frequência") +
-  theme_estat()
-```
-
-```{r}
-#| echo: false
-#| label: fig-grafico-9
-#| fig-cap: Top 3 produtos mais vendidos na Ferraria Apache
-
-ggplot(classes_fa) +
-  aes(
-    x = fct_reorder(NameProduct, n, .desc = T),
-    y = n,
-    label = label
-  ) +
-  geom_bar(stat = "identity", fill = "#A11D21", width = 0.7) +
-  geom_text(
-    position = position_dodge(width = .9),
-    vjust = -0.5, # hjust = .5,
-    size = 3
-  ) +
-  labs(x = "Produto", y = "Frequência") +
-  theme_estat()
-```
-
-\ \ \ \  Pode-se observar da tabela 4 que o **Whisky** foi o produto mais vendido das três lojas em análise. O desempenho desse produto nas diferentes lojas sugere que é um item popular entre os consumidores da região, assim como o **Chapeu de Coro** e a **Espingarda** que aparecem mais de uma vez na Tabela 5. Da Tabela 5, observa-se que o produto mais vendido na loja com maior receita em 1889 (**Loja Ouro Fino**) foram as **Botas de Couro**, com 52 unidades vendidas, o que corresponde a **6,02%** da receita anual. Entre as três lojas analisadas, o produto com maior volume de vendas foi a **Espingarda**, da **Loja TendTudo**, com 53 unidades vendidas.
+\ \ \ \ Pode-se observar da tabela 5 que o **Whisky** foi o produto mais vendido das três lojas em análise. O desempenho desse produto nas diferentes lojas sugere que é um item popular entre os consumidores da região, assim como o **Chapeu de Coro** e a **Espingarda** que aparecem mais de uma vez na Tabela 4.
 
 # Conclusão
 
@@ -903,5 +861,7 @@ ggplot(classes_fa) +
 
 2. 
 ```{r}
+#| echo: false
+
 sessionInfo()
 ```
